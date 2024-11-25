@@ -86,7 +86,7 @@ c326 -38 617 -167 815 -362 131 -129 206 -271 230 -436 35 -239 -109 -496
                 <i class="pi pi-ellipsis-v"></i>
             </button>
 
-            <div class="hidden layout-topbar-menu lg:block">
+            <!-- <div class="hidden layout-topbar-menu lg:block">
                 <div class="layout-topbar-menu-content">
                     <button type="button" class="layout-topbar-action">
                         <i class="pi pi-calendar"></i>
@@ -101,7 +101,7 @@ c326 -38 617 -167 815 -362 131 -129 206 -271 230 -436 35 -239 -109 -496
                         <span>Profile</span>
                     </button>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 </template>
