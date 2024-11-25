@@ -1,138 +1,191 @@
 import AppLayout from '@/layout/AppLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
+// Public Components
+const SignIn = () => import('@/views/pages/auth/SignIn.vue');
+const SignUp = () => import('@/views/pages/auth/SignUp.vue');
+const ForgetPassword = () => import('@/views/pages/auth/ForgetPassword.vue');
+const VerifyToken = () => import('@/views/pages/auth/VerifyToken.vue');
+const NewPassword = () => import('@/views/pages/auth/NewPassword.vue');
+const AccessDenied = () => import('@/views/pages/auth/Access.vue');
+const AuthError = () => import('@/views/pages/auth/Error.vue');
+const NotFound = () => import('@/views/pages/NotFound.vue');
+
+// Private Components
+const Landing = () => import('@/views/Landing/Landing.vue');
+const Dashboard = () => import('@/views/Dashboard/Dashboard.vue');
+const Profile = () => import('@/views/Profile/Profile.vue');
+const Settings = () => import('@/views/Settings/Settings.vue');
+const Teams = () => import('@/views/Teams/Teams.vue');
+const TeamDetail = () => import('@/views/Teams/Team/Team.vue');
+const Tasks = () => import('@/views/Tasks/Tasks.vue');
+const TaskDetail = () => import('@/views/Tasks/Task/Task.vue');
+const Reports = () => import('@/views/Reports/Reports.vue');
+const Users = () => import('@/views/Users/Users.vue');
+const UserDetail = () => import('@/views/Users/User/User.vue');
+// ... import other components similarly
+
+const routes = [
+  // Public Routes
+  {
+    path: '/auth',
+    children: [
+      {
+        path: 'sign-in',
+        name: 'SignIn',
+        component: SignIn,
+      },
+      {
+        path: 'sign-up',
+        name: 'SignUp',
+        component: SignUp,
+      },
+      {
+        path: 'forget-password',
+        name: 'ForgetPassword',
+        component: ForgetPassword,
+      },
+      {
+        path: '/auth/verify-token/:token',
+        name: 'VerifyToken',
+        component: VerifyToken,
+      },
+      {
+        path: 'new-password',
+        name: 'NewPassword',
+        component: NewPassword,
+      },
+      {
+        path: 'access-denied',
+        name: 'AccessDenied',
+        component: AccessDenied,
+      },
+      {
+        path: 'error',
+        name: 'AuthError',
+        component: AuthError,
+      },
+    ],
+  },
+
+  // Private Routes
+  {
+    path: '/',
+    component: AppLayout,
+    children: [
+      {
+        path: '/',
+        name: 'Dashboard',
+        component: Dashboard,
+      },
+      {
+        path: '/landing',
+        name: 'Landing',
+        component: Landing,
+      },
+      {
+        path: '/profile',
+        name: 'Profile',
+        component: Profile,
+      },
+      {
+        path: '/settings',
+        name: 'Settings',
+        component: Settings,
+      },
+      {
+        path: '/teams',
+        name: 'Teams',
+        component: Teams,
+      },
+      {
+        path: '/teams/team/:id',
+        name: 'TeamDetail',
+        component: TeamDetail,
+        props: true,
+      },
+      {
+        path: '/users',
+        name: 'Users',
+        component: Users,
+      },
+      {
+        path: '/users/user/:id',
+        name: 'UserDetail',
+        component: UserDetail,
+        props: true,
+      },
+      {
+        path: '/tasks',
+        name: 'Tasks',
+        component: Tasks,
+      },
+      {
+        path: '/tasks/task/:id',
+        name: 'TaskDetail',
+        component: TaskDetail,
+        props: true,
+      },
+      {
+        path: '/reports',
+        name: 'Reports',
+        component: Reports,
+      },
+    ],
+  },
+
+  // Catch-All Route for 404 Not Found
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: NotFound,
+  },
+];
+
+// Define Public Route Names
+const publicRouteNames = [
+  'SignIn',
+  'SignUp',
+  'ForgetPassword',
+  'VerifyToken',
+  'NewPassword',
+];
+
+// Create Router Instance
 const router = createRouter({
-    history: createWebHistory(),
-    routes: [
-        {
-            path: '/',
-            component: AppLayout,
-            children: [
-                {
-                    path: '/',
-                    name: 'dashboard',
-                    component: () => import('@/views/Dashboard.vue')
-                },
-                {
-                    path: '/uikit/formlayout',
-                    name: 'formlayout',
-                    component: () => import('@/views/uikit/FormLayout.vue')
-                },
-                {
-                    path: '/uikit/input',
-                    name: 'input',
-                    component: () => import('@/views/uikit/InputDoc.vue')
-                },
-                {
-                    path: '/uikit/button',
-                    name: 'button',
-                    component: () => import('@/views/uikit/ButtonDoc.vue')
-                },
-                {
-                    path: '/uikit/table',
-                    name: 'table',
-                    component: () => import('@/views/uikit/TableDoc.vue')
-                },
-                {
-                    path: '/uikit/list',
-                    name: 'list',
-                    component: () => import('@/views/uikit/ListDoc.vue')
-                },
-                {
-                    path: '/uikit/tree',
-                    name: 'tree',
-                    component: () => import('@/views/uikit/TreeDoc.vue')
-                },
-                {
-                    path: '/uikit/panel',
-                    name: 'panel',
-                    component: () => import('@/views/uikit/PanelsDoc.vue')
-                },
+  history: createWebHistory(),
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (to.hash) {
+      return {
+        el: to.hash,
+        behavior: 'smooth',
+      };
+    }
+    return {
+      top: 0,
+      behavior: 'smooth',
+    };
+  },
+});
 
-                {
-                    path: '/uikit/overlay',
-                    name: 'overlay',
-                    component: () => import('@/views/uikit/OverlayDoc.vue')
-                },
-                {
-                    path: '/uikit/media',
-                    name: 'media',
-                    component: () => import('@/views/uikit/MediaDoc.vue')
-                },
-                {
-                    path: '/uikit/message',
-                    name: 'message',
-                    component: () => import('@/views/uikit/MessagesDoc.vue')
-                },
-                {
-                    path: '/uikit/file',
-                    name: 'file',
-                    component: () => import('@/views/uikit/FileDoc.vue')
-                },
-                {
-                    path: '/uikit/menu',
-                    name: 'menu',
-                    component: () => import('@/views/uikit/MenuDoc.vue')
-                },
-                {
-                    path: '/uikit/charts',
-                    name: 'charts',
-                    component: () => import('@/views/uikit/ChartDoc.vue')
-                },
-                {
-                    path: '/uikit/misc',
-                    name: 'misc',
-                    component: () => import('@/views/uikit/MiscDoc.vue')
-                },
-                {
-                    path: '/uikit/timeline',
-                    name: 'timeline',
-                    component: () => import('@/views/uikit/TimelineDoc.vue')
-                },
-                {
-                    path: '/pages/empty',
-                    name: 'empty',
-                    component: () => import('@/views/pages/Empty.vue')
-                },
-                {
-                    path: '/pages/crud',
-                    name: 'crud',
-                    component: () => import('@/views/pages/Crud.vue')
-                },
-                {
-                    path: '/documentation',
-                    name: 'documentation',
-                    component: () => import('@/views/pages/Documentation.vue')
-                }
-            ]
-        },
-        {
-            path: '/landing',
-            name: 'landing',
-            component: () => import('@/views/pages/Landing.vue')
-        },
-        {
-            path: '/pages/notfound',
-            name: 'notfound',
-            component: () => import('@/views/pages/NotFound.vue')
-        },
+// Global Navigation Guard
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token'); // Adjust based on how you store the token
 
-        {
-            path: '/auth/login',
-            name: 'login',
-            component: () => import('@/views/pages/auth/Login.vue')
-        },
-        {
-            path: '/auth/access',
-            name: 'accessDenied',
-            component: () => import('@/views/pages/auth/Access.vue')
-        },
-        {
-            path: '/auth/error',
-            name: 'error',
-            component: () => import('@/views/pages/auth/Error.vue')
-        }
-    ]
+  if (token) {
+    // If authenticated, prevent access to public routes
+    if (publicRouteNames.includes(to.name)) {
+      return next({ name: 'Dashboard' }); // Redirect to Dashboard or any private route
+    }
+  } else {
+    // If not authenticated, restrict access to private routes
+    if (!publicRouteNames.includes(to.name)) {
+      return next({ name: 'SignIn' }); // Redirect to Login
+    }
+  }
+
+  next(); // Proceed to route
 });
 
 export default router;

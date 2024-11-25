@@ -20,13 +20,14 @@ export default defineConfig({
             '@': fileURLToPath(new URL('./src', import.meta.url))
         }
     },
-    server: { // Changed from devServer to server
+    server: { 
+        port: 8080,
         proxy: {
             '/api': {
                 target: process.env.VITE_BASE_URL, // Changed to VITE_BASE_URL
                 changeOrigin: true,
                 secure: false,
-                rewrite: (path) => path.replace(/^\/api/, ''),
+                rewrite: (path) => path.replace(/^\/api/,  '/api'),
             },
         },
     },
