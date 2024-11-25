@@ -4,9 +4,12 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
+import { useAuthStore } from '@/lib/stores/useAuthStore/useAuthStore';
+const authStore = useAuthStore();
 
 // Comprehensive list of countries
 const countries = [
+  { label: 'Pakistan', value: 'PK' },
   { label: 'United States', value: 'US' },
   { label: 'Canada', value: 'CA' },
   { label: 'United Kingdom', value: 'UK' },
@@ -24,6 +27,7 @@ const countries = [
 
 const firstname = ref('');
 const lastname = ref('');
+const username = ref('');
 const email = ref('');
 const password = ref('');
 const country = ref(null);
@@ -32,11 +36,25 @@ const national_id = ref('');
 
 const router = useRouter();
 
-const handleSignUp = () => {
-  // Implement your sign-up logic here, e.g., API call
-  // On success, navigate to Dashboard or Login page
-  router.push({ name: 'Dashboard' });
+const handleSignUp = async () => {
+  try {
+
+    await authStore.registerUser({
+      first_name: firstname.value,
+      last_name: lastname.value,
+      username: username.value,
+      email: email.value,
+      password: password.value,
+      country: country.value.value,
+      skill: skill.value,
+      national_id: national_id.value,
+    });
+    router.push('/auth/sign-in');
+  } catch (error) {
+    console.error(error);
+  }
 };
+
 </script>
 
 <template>
@@ -86,17 +104,32 @@ const handleSignUp = () => {
                   v-model="lastname"
                 />
               </div>
+
+              
             </div>
 
-
+            <div class="flex flex-wrap w-full gap-4 md:flex-nowrap">
+              <div  class="w-full mb-4 md:w-1/2">
+            <label for="username" class="block mb-2 text-xl font-medium text-surface-900 dark:text-surface-0">Username</label>
+            <InputText
+              id="username"
+              type="text"
+              placeholder="@username"
+              class="w-full"
+              v-model="username"
+            />
+              </div>
+              <div  class="w-full mb-4 md:w-1/2">
             <label for="email" class="block mb-2 text-xl font-medium text-surface-900 dark:text-surface-0">Email</label>
             <InputText
               id="email"
               type="email"
               placeholder="Email address"
-              class="w-full md:min-w-[30rem] mb-4"
+              class="w-full"
               v-model="email"
             />
+              </div>
+              </div>
 
             <label for="password" class="block mb-2 text-xl font-medium text-surface-900 dark:text-surface-0">Password</label>
             <Password
@@ -146,8 +179,11 @@ const handleSignUp = () => {
               label="Sign Up"
               class="w-full mb-4"
               @click="handleSignUp"
-              :disabled="!firstname || !lastname || !email || !password || !country || !skill || !national_id"
+              :disabled="!firstname || !lastname || !username || !email || !password || !country || !skill || !national_id"
+              v-if="!authStore.loading"
             />
+                        <Button icon="pi pi-spin pi-spinner" class="w-full"  label="Sign Up" v-else></Button>
+          
 
             <div class="text-center">
               <span class="text-muted-color">Already have an account?</span>

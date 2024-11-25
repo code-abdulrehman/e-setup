@@ -28,7 +28,7 @@ const handleLogin = async () => {
 
   // Check if login was successful by verifying if user and token are set
   if (authStore.user && authStore.token) {
-     router.push('/dashboard'); // Ensure this route exists
+     router.push('/'); // Ensure this route exists
   } else {
        // Handle login failure
        console.error('Login failed');
@@ -100,8 +100,8 @@ c326 -38 617 -167 815 -362 131 -129 206 -271 230 -436 35 -239 -109 -496
                             </span>
                         </div>
                         
-            <Button icon="pi pi-spin pi-spinner" label="Sign In" v-if="authStore.loading"></Button>
-            <Button label="Sign In" class="w-full" @click="handleLogin" :disabled="!email || !password || authStore.loading" v-else></Button>
+                        <Button label="Sign In" class="w-full" @click="handleLogin" :disabled="!email || !password" v-if="!authStore.loading"></Button>
+                        <Button icon="pi pi-spin pi-spinner" class="w-full"  label="Sign In" v-else></Button>
           </div>
           <div class="mt-4 text-center">
               <span class="font-medium text-muted-color">Don't have an account?</span>

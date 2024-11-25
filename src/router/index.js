@@ -171,7 +171,7 @@ const router = createRouter({
 
 // Global Navigation Guard
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token'); // Adjust based on how you store the token
+  const token = sessionStorage.getItem('token'); // Adjust based on how you store the token
 
   if (token) {
     // If authenticated, prevent access to public routes

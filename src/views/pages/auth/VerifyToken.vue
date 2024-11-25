@@ -11,10 +11,9 @@ const route = useRoute();
 
 onMounted(() => {
   // Extract route parameters
-  const token = route.params.token || '';
 
-  // Store them in sessionStorage
-  if (token) sessionStorage.setItem('verificationToken', token);
+  const token = route.params.token || '';
+  if (token) sessionStorage.setItem("passwordResetToken", token)
 });
 
 const proceedToNewPassword = () => {

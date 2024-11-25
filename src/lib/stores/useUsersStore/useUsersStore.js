@@ -1,7 +1,7 @@
 // src/stores/useUsersStore.js
-import { defineStore } from 'pinia';
 import axiosInstance from '@/lib/api/axiosInstance';
 import { showToast } from '@/utils/toast';
+import { defineStore } from 'pinia';
 
 export const useUsersStore = defineStore('users', {
   state: () => ({
@@ -16,7 +16,7 @@ export const useUsersStore = defineStore('users', {
     async getAllUsers() {
       this.loading = true;
       try {
-        const response = await axiosInstance.get('/api/users');
+        const response = await axiosInstance.get('/users');
         this.users = response.data.users;
       } catch (error) {
         showToast({ severity: 'error', summary: 'Error Fetching Users', detail: error.response?.data?.message || error.message, life: 3000 });
@@ -28,7 +28,7 @@ export const useUsersStore = defineStore('users', {
     async getExpertiseList() {
       this.loading = true;
       try {
-        const response = await axiosInstance.get('/api/users/expertise');
+        const response = await axiosInstance.get('/users/expertise');
         this.expertiseList = response.data.expertise;
       } catch (error) {
         showToast({ severity: 'error', summary: 'Error Fetching Expertise', detail: error.response?.data?.message || error.message, life: 3000 });
@@ -40,7 +40,7 @@ export const useUsersStore = defineStore('users', {
     async getCountriesList() {
       this.loading = true;
       try {
-        const response = await axiosInstance.get('/API/users/countries');
+        const response = await axiosInstance.get('/users/countries');
         this.countriesList = response.data.countries;
       } catch (error) {
         showToast({ severity: 'error', summary: 'Error Fetching Countries', detail: error.response?.data?.message || error.message, life: 3000 });
@@ -52,7 +52,7 @@ export const useUsersStore = defineStore('users', {
     async getUserById(userId) {
       this.loading = true;
       try {
-        const response = await axiosInstance.get(`/api/users/${userId}`);
+        const response = await axiosInstance.get(`/users/${userId}`);
         this.currentUser = response.data.user;
       } catch (error) {
         showToast({ severity: 'error', summary: 'Error Fetching User', detail: error.response?.data?.message || error.message, life: 3000 });
@@ -64,7 +64,7 @@ export const useUsersStore = defineStore('users', {
     async updateUser(userId, updateData) {
       this.loading = true;
       try {
-        const response = await axiosInstance.put(`/api/users/${userId}`, updateData);
+        const response = await axiosInstance.put(`/users/${userId}`, updateData);
         const index = this.users.findIndex(user => user.id === userId);
         if (index !== -1) {
           this.users[index] = response.data.user;
@@ -80,7 +80,7 @@ export const useUsersStore = defineStore('users', {
     async deleteUser(userId) {
       this.loading = true;
       try {
-        await axiosInstance.delete(`/api/users/${userId}`);
+        await axiosInstance.delete(`/users/${userId}`);
         this.users = this.users.filter(user => user.id !== userId);
         showToast({ severity: 'success', summary: 'User Deleted', detail: 'User has been deleted successfully.', life: 3000 });
       } catch (error) {
@@ -93,7 +93,7 @@ export const useUsersStore = defineStore('users', {
     async getUserPeerIds() {
       this.loading = true;
       try {
-        const response = await axiosInstance.get('/api/users/peerids');
+        const response = await axiosInstance.get('/users/peerids');
         this.peerIds = response.data.peerIds;
       } catch (error) {
         showToast({ severity: 'error', summary: 'Error Fetching Peer IDs', detail: error.response?.data?.message || error.message, life: 3000 });

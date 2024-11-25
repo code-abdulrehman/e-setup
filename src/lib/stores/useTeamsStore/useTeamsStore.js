@@ -1,7 +1,7 @@
 // src/stores/useTeamsStore.js
-import { defineStore } from 'pinia';
 import axiosInstance from '@/lib/api/axiosInstance';
 import { showToast } from '@/utils/toast';
+import { defineStore } from 'pinia';
 
 export const useTeamsStore = defineStore('teams', {
   state: () => ({
@@ -13,7 +13,7 @@ export const useTeamsStore = defineStore('teams', {
     async createTeam(teamData) {
       this.loading = true;
       try {
-        const response = await axiosInstance.post('/api/teams', teamData);
+        const response = await axiosInstance.post('/teams', teamData);
         this.teams.push(response.data.team);
         showToast({ severity: 'success', summary: 'Team Created', detail: 'Team has been created successfully.', life: 3000 });
       } catch (error) {
@@ -26,7 +26,7 @@ export const useTeamsStore = defineStore('teams', {
     async getTeamById(teamId) {
       this.loading = true;
       try {
-        const response = await axiosInstance.get(`/api/teams/${teamId}`);
+        const response = await axiosInstance.get(`/teams/${teamId}`);
         this.currentTeam = response.data.team;
       } catch (error) {
         showToast({ severity: 'error', summary: 'Error Fetching Team', detail: error.response?.data?.message || error.message, life: 3000 });
@@ -38,7 +38,7 @@ export const useTeamsStore = defineStore('teams', {
     async deleteTeam(teamId) {
       this.loading = true;
       try {
-        await axiosInstance.delete(`/api/teams/${teamId}`);
+        await axiosInstance.delete(`/teams/${teamId}`);
         this.teams = this.teams.filter(team => team.id !== teamId);
         showToast({ severity: 'success', summary: 'Team Deleted', detail: 'Team has been deleted successfully.', life: 3000 });
       } catch (error) {
@@ -51,7 +51,7 @@ export const useTeamsStore = defineStore('teams', {
     async inviteMember(teamId, emailData) {
       this.loading = true;
       try {
-        await axiosInstance.post(`/api/teams/${teamId}/invite`, emailData);
+        await axiosInstance.post(`/teams/${teamId}/invite`, emailData);
         showToast({ severity: 'success', summary: 'Invitation Sent', detail: 'Invitation has been sent to the member.', life: 3000 });
       } catch (error) {
         showToast({ severity: 'error', summary: 'Error Sending Invitation', detail: error.response?.data?.message || error.message, life: 3000 });
@@ -63,7 +63,7 @@ export const useTeamsStore = defineStore('teams', {
     async acceptTeamInvitation(inviteToken, passwordData) {
       this.loading = true;
       try {
-        await axiosInstance.post(`/api/teams/invite/accept/${inviteToken}`, passwordData);
+        await axiosInstance.post(`/teams/invite/accept/${inviteToken}`, passwordData);
         showToast({ severity: 'success', summary: 'Invitation Accepted', detail: 'You have joined the team successfully.', life: 3000 });
       } catch (error) {
         showToast({ severity: 'error', summary: 'Error Accepting Invitation', detail: error.response?.data?.message || error.message, life: 3000 });
@@ -75,7 +75,7 @@ export const useTeamsStore = defineStore('teams', {
     async getAllTeams() {
       this.loading = true;
       try {
-        const response = await axiosInstance.get('/api/teams');
+        const response = await axiosInstance.get('/teams');
         this.teams = response.data.teams;
       } catch (error) {
         showToast({ severity: 'error', summary: 'Error Fetching Teams', detail: error.response?.data?.message || error.message, life: 3000 });

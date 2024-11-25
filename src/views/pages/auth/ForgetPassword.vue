@@ -4,14 +4,22 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
+import { useAuthStore } from '@/lib/stores/useAuthStore/useAuthStore';
+const authStore = useAuthStore();
 
 const email = ref('');
 const router = useRouter();
 
-const handleForgetPassword = () => {
-  // Implement your forget password logic here, e.g., API call
-  // On success, navigate to VerifyToken page
-  router.push("/auth/verify-token/dfds");
+const handleForgetPassword = async () => {
+  try {
+    await authStore.forgotPassword({ email: email.value });
+    const token = sessionStorage.getItem("passwordResetToken")
+    if(token){
+      router.push(`/auth/verify-token/${token}`);
+    }
+  } catch (error) {
+    console.error('Failed to initiate password reset:', error);
+  }
 };
 </script>
 
@@ -25,10 +33,10 @@ const handleForgetPassword = () => {
         <div class="w-full px-8 py-20 bg-surface-0 dark:bg-surface-900 sm:px-20" style="border-radius: 53px">
           <div class="mb-8 text-center">
             <svg version="1.0" xmlns="http://www.w3.org/2000/svg" class="w-16 mx-auto mb-8 shrink-0"
-                            viewBox="0 0 736.000000 736.000000" preserveAspectRatio="xMidYMid meet">
-                            <g transform="translate(0.000000,736.000000) scale(0.100000,-0.100000)"
-                                fill="var(--primary-color)" stroke="none">
-                                <path d="M3435 5484 c-414 -65 -777 -244 -1079 -534 -315 -303 -496 -665 -547
+              viewBox="0 0 736.000000 736.000000" preserveAspectRatio="xMidYMid meet">
+              <g transform="translate(0.000000,736.000000) scale(0.100000,-0.100000)" fill="var(--primary-color)"
+                stroke="none">
+                <path d="M3435 5484 c-414 -65 -777 -244 -1079 -534 -315 -303 -496 -665 -547
 -1095 -14 -122 -6 -398 15 -513 112 -605 486 -1101 1030 -1366 268 -131 598
 -206 906 -206 307 0 571 62 855 199 474 230 834 629 1000 1111 147 425 122
 865 -74 1309 -257 582 -823 990 -1513 1091 -160 24 -453 26 -593 4z m460 -564
@@ -39,12 +47,12 @@ c326 -38 617 -167 815 -362 131 -129 206 -271 230 -436 35 -239 -109 -496
 -192 -268 -173 -174 -369 -278 -633 -336 -120 -26 -369 -24 -500 4 -277 59
 -508 177 -703 357 -187 173 -328 436 -373 695 -20 117 -16 346 9 460 53 245
 166 447 356 635 201 199 422 320 682 374 152 32 279 38 429 21z" />
-                                <path d="M3560 4551 c-463 -104 -730 -403 -780 -871 -16 -154 -18 -149 41 -96
+                <path d="M3560 4551 c-463 -104 -730 -403 -780 -871 -16 -154 -18 -149 41 -96
 62 56 167 109 274 138 77 21 105 22 665 27 570 6 586 7 631 28 61 28 114 75
 147 132 24 40 27 57 27 131 0 73 -4 93 -29 143 -75 153 -280 291 -535 359
 -112 30 -327 34 -441 9z" />
-                            </g>
-                        </svg>
+              </g>
+            </svg>
             <div class="mb-4 text-3xl font-medium text-surface-900 dark:text-surface-0">
               Forgot Your Password?
             </div>
@@ -55,20 +63,13 @@ c326 -38 617 -167 815 -362 131 -129 206 -271 230 -436 35 -239 -109 -496
 
           <div>
             <label for="email" class="block mb-2 text-xl font-medium text-surface-900 dark:text-surface-0">Email</label>
-            <InputText
-              id="email"
-              type="email"
-              placeholder="Email address"
-              class="w-full md:min-w-[30rem] mb-8"
-              v-model="email"
-            />
+            <InputText id="email" type="email" placeholder="Email address" class="w-full md:min-w-[30rem] mb-8"
+              v-model="email" />
 
-            <Button
-              label="Submit"
-              class="w-full"
-              @click="handleForgetPassword"
-              :disabled="!email"
-            />
+            <Button label="Submit" class="w-full" @click="handleForgetPassword" :disabled="!email"
+              v-if="!authStore.loading" />
+            <Button icon="pi pi-spin pi-spinner" class="w-full" label="Submit" v-else></Button>
+
           </div>
         </div>
       </div>

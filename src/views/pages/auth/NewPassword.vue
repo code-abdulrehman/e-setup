@@ -4,24 +4,40 @@
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
+import { useAuthStore } from '@/lib/stores/useAuthStore/useAuthStore';
+const authStore = useAuthStore();
 
 const router = useRouter();
 const route = useRoute();
-const token = route.query.token || ''; // Assuming token is passed as a query parameter
-
 const newPassword = ref('');
 const confirmPassword = ref('');
 
-const handleNewPassword = () => {
-  if (newPassword.value !== confirmPassword.value) {
-    // Handle password mismatch
-    alert("Passwords do not match!");
+const handleNewPassword = async () => {
+  const token = sessionStorage.getItem("passwordResetToken")
+   
+  if (!token) {
+    alert('Reset token is missing. Please request a new password reset.');
     return;
   }
 
-  // Implement your password reset logic here, e.g., API call with token and newPassword
-  // On success, navigate to Login page
-  router.push({ name: 'SignIn' });
+  if (newPassword.value !== confirmPassword.value) {
+    alert('Passwords do not match!');
+    return;
+  }
+
+  if (newPassword.value.length < 8) {
+    alert('Password must be at least 8 characters long.');
+    return;
+  }
+
+  try {
+    await authStore.resetPassword(token, { password: newPassword.value });
+    router.push({ name: 'SignIn' });
+    sessionStorage.removeItem("passwordResetToken")
+
+  } catch (error) {
+    console.error('Password reset failed:', error);
+  }
 };
 </script>
 
@@ -90,7 +106,9 @@ c326 -38 617 -167 815 -362 131 -129 206 -271 230 -436 35 -239 -109 -496
               class="w-full md:min-w-[30rem] mb-8"
               @click="handleNewPassword"
               :disabled="!newPassword || !confirmPassword"
-            />
+              v-if="!authStore.loading" />
+            <Button icon="pi pi-spin pi-spinner" class="w-full" label="Submit" v-else></Button>
+
           </div>
         </div>
       </div>

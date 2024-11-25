@@ -1,8 +1,21 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from './AppConfigurator.vue';
+import { useAuthStore } from '@/lib/stores/useAuthStore/useAuthStore';
+import { useRouter } from 'vue-router';
+const authStore = useAuthStore();
 
+const router = useRouter();
 const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
+const logout = async()=> {
+    try{
+        authStore.logout();
+        router.push('/auth/sign-in');
+        
+    }catch(error){
+        console.error(error)
+    };
+}
 </script>
 
 <template>
@@ -52,6 +65,19 @@ c326 -38 617 -167 815 -362 131 -129 206 -271 230 -436 35 -239 -109 -496
                         <i class="pi pi-palette"></i>
                     </button>
                     <AppConfigurator />
+                </div>
+                <div class="relative">
+                    <Avatar label="U" style="height: 37px; width: 37px;" class="bg-primary" shape="circle"/>
+                </div>
+                <div class="relative">
+                    <button
+                    class="layout-topbar-action" 
+                     @click="logout"
+                    :disabled="authStore.loading"
+                        type="button">
+                        <i class="pi pi-sign-in" v-if="!authStore.loading" ></i>
+                        <i class="pi pi-spin pi-spinner" v-else></i>
+                    </button>
                 </div>
             </div>
 
