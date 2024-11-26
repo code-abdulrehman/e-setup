@@ -18,6 +18,7 @@ const Profile = () => import('@/views/Profile/Profile.vue');
 const Settings = () => import('@/views/Settings/Settings.vue');
 const Teams = () => import('@/views/Teams/Teams.vue');
 const TeamDetail = () => import('@/views/Teams/Team/Team.vue');
+const TeamInvite = () => import('@/views/Teams/TeamInvite/TeamInvite.vue');
 const Tasks = () => import('@/views/Tasks/Tasks.vue');
 const TaskDetail = () => import('@/views/Tasks/Task/Task.vue');
 const Reports = () => import('@/views/Reports/Reports.vue');
@@ -98,10 +99,21 @@ const routes = [
         name: 'Teams',
         component: Teams,
       },
+      // {
+      //   path: '/teams/:tabs',
+      //   name: 'Teams',
+      //   component: Teams,
+      // },
       {
         path: '/teams/team/:id',
         name: 'TeamDetail',
         component: TeamDetail,
+        props: true,
+      },
+      {
+        path: '/teams/teaminvite/:token',
+        name: 'TeamInvite',
+        component: TeamInvite,
         props: true,
       },
       {

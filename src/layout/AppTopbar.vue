@@ -3,10 +3,15 @@ import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from './AppConfigurator.vue';
 import { useAuthStore } from '@/lib/stores/useAuthStore/useAuthStore';
 import { useRouter } from 'vue-router';
+import { computed } from 'vue';
 const authStore = useAuthStore();
 
 const router = useRouter();
 const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
+const user = computed(() => {
+    const profile = JSON.parse(localStorage.getItem('user'));
+    return profile || {};
+});
 const logout = async()=> {
     try{
         authStore.logout();
@@ -54,6 +59,7 @@ c326 -38 617 -167 815 -362 131 -129 206 -271 230 -436 35 -239 -109 -496
         </div>
 
         <div class="layout-topbar-actions">
+            
             <div class="layout-config-menu">
                 <button type="button" class="layout-topbar-action" @click="toggleDarkMode">
                     <i :class="['pi', { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme }]"></i>
@@ -67,7 +73,7 @@ c326 -38 617 -167 815 -362 131 -129 206 -271 230 -436 35 -239 -109 -496
                     <AppConfigurator />
                 </div>
                 <div class="relative">
-                    <Avatar label="U" style="height: 37px; width: 37px;" class="bg-primary" shape="circle"/>
+                    <Avatar :label="user.username[0].toUpperCase()" style="height: 35px; width: 35px;" class="font-bold" shape="circle"/>
                 </div>
                 <div class="relative">
                     <button
@@ -81,10 +87,10 @@ c326 -38 617 -167 815 -362 131 -129 206 -271 230 -436 35 -239 -109 -496
                 </div>
             </div>
 
-            <button class="layout-topbar-menu-button layout-topbar-action"
+            <!-- <button class="layout-topbar-menu-button layout-topbar-action"
                 v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }">
                 <i class="pi pi-ellipsis-v"></i>
-            </button>
+            </button> -->
 
             <!-- <div class="hidden layout-topbar-menu lg:block">
                 <div class="layout-topbar-menu-content">

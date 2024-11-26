@@ -1,7 +1,7 @@
 // src/stores/useAdminStore.js
-import { defineStore } from 'pinia';
 import axiosInstance from '@/lib/api/axiosInstance';
-import { showToast } from '@/utils/toast';
+import { showToast } from '@/lib/utils/toast';
+import { defineStore } from 'pinia';
 
 export const useAdminStore = defineStore('admin', {
   state: () => ({

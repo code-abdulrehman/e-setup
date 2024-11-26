@@ -1,3 +1,6 @@
 <template>
-    <h1>Teams</h1>
+    <Teams/>
 </template>
+<script setup>
+import Teams from '@/components/Teams/Teams.vue'
+</script>

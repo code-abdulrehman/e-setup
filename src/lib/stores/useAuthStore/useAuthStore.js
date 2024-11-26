@@ -10,6 +10,10 @@ export const useAuthStore = defineStore('auth', {
     loading: false,
     logoutTimer: null,
   }),
+  getters: {
+    // Getter to fetch the user's role
+    role: (state) => state.user?.role || null,
+  },
   actions: {
     initializeStore() {
       if (this.token) {

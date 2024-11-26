@@ -1,37 +1,94 @@
-// src/stores/useTeamsStore.js
-import axiosInstance from '@/lib/api/axiosInstance';
-import { showToast } from '@/utils/toast';
 import { defineStore } from 'pinia';
+import axiosInstance from '@/lib/api/axiosInstance';
+import { showToast } from '@/lib/utils/toast';
 
 export const useTeamsStore = defineStore('teams', {
   state: () => ({
     teams: [],
-    currentTeam: null,
+    invitations: [],
     loading: false,
   }),
   actions: {
-    async createTeam(teamData) {
+    async fetchTeams(role, userId) {
       this.loading = true;
       try {
-        const response = await axiosInstance.post('/teams', teamData);
-        this.teams.push(response.data.team);
-        showToast({ severity: 'success', summary: 'Team Created', detail: 'Team has been created successfully.', life: 3000 });
+        let endpoint = '/teams';
+        if (role === 'admin') {
+          endpoint = `/teams/admin/${userId}`;
+        }
+        const response = await axiosInstance.get(endpoint);
+        this.teams = response.data.data;
       } catch (error) {
-        showToast({ severity: 'error', summary: 'Error Creating Team', detail: error.response?.data?.message || error.message, life: 3000 });
+        showToast({
+          severity: 'error',
+          summary: 'Error Fetching Teams',
+          detail: error.response?.data?.message || error.message,
+          life: 3000,
+        });
       } finally {
         this.loading = false;
       }
     },
 
-    async getTeamById(teamId) {
+    async fetchInvitations(role, userId) {
       this.loading = true;
       try {
-        const response = await axiosInstance.get(`/teams/${teamId}`);
-        this.currentTeam = response.data.team;
+        let endpoint = '/teams/invites';
+        const response = await axiosInstance.get(endpoint);
+        this.invitations = response.data.data;
       } catch (error) {
-        showToast({ severity: 'error', summary: 'Error Fetching Team', detail: error.response?.data?.message || error.message, life: 3000 });
+        showToast({
+          severity: 'error',
+          summary: 'Error Fetching Invitations',
+          detail: error.response?.data?.message || error.message,
+          life: 3000,
+        });
       } finally {
         this.loading = false;
+      }
+    },
+
+
+    async createTeam(teamData) {
+      try {
+        const response = await axiosInstance.post('/teams', teamData);
+        this.teams.push(response.data.team);
+        showToast({
+          severity: 'success',
+          summary: 'Team Created',
+          detail: 'Team has been created successfully.',
+          life: 3000,
+        });
+      } catch (error) {
+        showToast({
+          severity: 'error',
+          summary: 'Error Creating Team',
+          detail: error.response?.data?.message || error.message,
+          life: 3000,
+        });
+        throw error; // Rethrow to handle in the component
+      }
+    },
+
+    async inviteUserToTeam(email, teamId) {
+      try {
+        const response = await axiosInstance.post(`/teams/${teamId}/invite`, { email });
+        showToast({
+          severity: 'success',
+          summary: 'Invitation Sent',
+          detail: 'User has been invited successfully.',
+          life: 3000,
+        });
+        // Optionally, update the invitations list
+        this.fetchInvitations(this.role, this.userId);
+      } catch (error) {
+        showToast({
+          severity: 'error',
+          summary: 'Error Sending Invitation',
+          detail: error.response?.data?.message || error.message,
+          life: 3000,
+        });
+        throw error; // Rethrow to handle in the component
       }
     },
 
@@ -39,48 +96,70 @@ export const useTeamsStore = defineStore('teams', {
       this.loading = true;
       try {
         await axiosInstance.delete(`/teams/${teamId}`);
-        this.teams = this.teams.filter(team => team.id !== teamId);
-        showToast({ severity: 'success', summary: 'Team Deleted', detail: 'Team has been deleted successfully.', life: 3000 });
+        this.teams = this.teams.filter((team) => team.id !== teamId);
+        showToast({
+          severity: 'success',
+          summary: 'Team Deleted',
+          detail: 'Team has been deleted successfully.',
+          life: 3000,
+        });
       } catch (error) {
-        showToast({ severity: 'error', summary: 'Error Deleting Team', detail: error.response?.data?.message || error.message, life: 3000 });
+        showToast({
+          severity: 'error',
+          summary: 'Error Deleting Team',
+          detail: error.response?.data?.message || error.message,
+          life: 3000,
+        });
       } finally {
         this.loading = false;
       }
     },
 
-    async inviteMember(teamId, emailData) {
-      this.loading = true;
+    // Additional actions for accepting/rejecting invitations
+    async acceptInvitation(token) {
       try {
-        await axiosInstance.post(`/teams/${teamId}/invite`, emailData);
-        showToast({ severity: 'success', summary: 'Invitation Sent', detail: 'Invitation has been sent to the member.', life: 3000 });
+        await axiosInstance.put(`/teams/invitations/accept/${token}`);
+        showToast({
+          severity: 'success',
+          summary: 'Invitation Accepted',
+          detail: 'You have joined the team successfully.',
+          life: 3000,
+        });
+        // Refresh teams and invitations
+        const role = this.role;
+        const userId = this.userId;
+        this.fetchTeams(role, userId);
+        this.fetchInvitations(role, userId);
       } catch (error) {
-        showToast({ severity: 'error', summary: 'Error Sending Invitation', detail: error.response?.data?.message || error.message, life: 3000 });
-      } finally {
-        this.loading = false;
+        showToast({
+          severity: 'error',
+          summary: 'Error Accepting Invitation',
+          detail: error.response?.data?.message || error.message,
+          life: 3000,
+        });
       }
     },
 
-    async acceptTeamInvitation(inviteToken, passwordData) {
-      this.loading = true;
+    async rejectInvitation(token) {
       try {
-        await axiosInstance.post(`/teams/invite/accept/${inviteToken}`, passwordData);
-        showToast({ severity: 'success', summary: 'Invitation Accepted', detail: 'You have joined the team successfully.', life: 3000 });
+        await axiosInstance.put(`/teams/invitations/reject/${token}`);
+        showToast({
+          severity: 'info',
+          summary: 'Invitation Rejected',
+          detail: 'You have rejected the invitation.',
+          life: 3000,
+        });
+        // Refresh invitations
+        const role = this.role;
+        const userId = this.userId;
+        this.fetchInvitations(role, userId);
       } catch (error) {
-        showToast({ severity: 'error', summary: 'Error Accepting Invitation', detail: error.response?.data?.message || error.message, life: 3000 });
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    async getAllTeams() {
-      this.loading = true;
-      try {
-        const response = await axiosInstance.get('/teams');
-        this.teams = response.data.teams;
-      } catch (error) {
-        showToast({ severity: 'error', summary: 'Error Fetching Teams', detail: error.response?.data?.message || error.message, life: 3000 });
-      } finally {
-        this.loading = false;
+        showToast({
+          severity: 'error',
+          summary: 'Error Rejecting Invitation',
+          detail: error.response?.data?.message || error.message,
+          life: 3000,
+        });
       }
     },
   },

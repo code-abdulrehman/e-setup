@@ -1,6 +1,6 @@
 // src/stores/useUsersStore.js
 import axiosInstance from '@/lib/api/axiosInstance';
-import { showToast } from '@/utils/toast';
+import { showToast } from '@/lib/utils/toast';
 import { defineStore } from 'pinia';
 
 export const useUsersStore = defineStore('users', {
@@ -17,7 +17,7 @@ export const useUsersStore = defineStore('users', {
       this.loading = true;
       try {
         const response = await axiosInstance.get('/users');
-        this.users = response.data.users;
+        this.users = response.data.data;
       } catch (error) {
         showToast({ severity: 'error', summary: 'Error Fetching Users', detail: error.response?.data?.message || error.message, life: 3000 });
       } finally {

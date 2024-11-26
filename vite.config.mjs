@@ -21,7 +21,7 @@ export default defineConfig({
         }
     },
     server: { 
-        port: 8080,
+        port: 8081,
         proxy: {
             '/api': {
                 target: process.env.VITE_BASE_URL, // Changed to VITE_BASE_URL
