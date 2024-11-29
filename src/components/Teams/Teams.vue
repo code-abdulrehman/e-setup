@@ -8,7 +8,7 @@
       <component
         :is="currentComponent"
         @open-create-team="openCreateTeamDialog"
-        @open-invite-user="openInviteUserModal"
+        @open-invite-user="handleInviteUser"
         @invite-user="handleInviteUser"
         @delete-team="handleDeleteTeam"
         @accept-invitation="handleAcceptInvitation"
@@ -17,15 +17,19 @@
     </div>
 
     <!-- Create Team Modal -->
-    <Dialog header="Create Team" :visible.sync="createTeamDialogVisible" modal>
+    <Dialog header="Create Team" :visible.sync="createTeamDialogVisible" modal :closable="false">
       <form @submit.prevent="createTeam">
-        <InputText v-model="newTeamName" placeholder="Team Name" class="w-full mb-3" />
-        <Button label="Create" type="submit" :loading="creatingTeam" />
-      </form>
+        <InputText v-model="newTeamName" placeholder="Team Name" class="w-full md:min-w-[400px] 3 my-4" />
+        <div class="flex justify-end gap-2">
+      
+      <Button label="Close" @click="closeCreateteamDialog" class="p-button-text" />
+      <Button label="Create team" type="submit" :loading="creatingTeam" />
+    </div>
+   </form>
     </Dialog>
 
     <!-- Invite User Modal -->
-    <Dialog header="Invite User" :visible.sync="inviteUserDialogVisible" modal >
+    <Dialog header="Invite User" :visible.sync="inviteUserDialogVisible" modal :closable="false" class="w-full md:w-[450px]">
       <form @submit.prevent="inviteUser">
         <!-- User Selection Dropdown -->
         <Dropdown
@@ -45,11 +49,20 @@
           option-value="_id"
           placeholder="Select Team"
           class="w-full mb-3"
+          :loading="loadingUsers"
+          :disabled="alredySelectedTeam"
         />
-        <Button label="Send Invite" type="submit" :loading="invitingUser" />
+
+    <div class="flex justify-end gap-2">
+      
+      <Button label="Close" @click="closeDialog" class="p-button-text" />
+      <Button label="Send Invite" type="submit" :loading="invitingUser" />
+    </div>
       </form>
     </Dialog>
   </div>
+  <Toast />
+  <ConfirmDialog></ConfirmDialog>
 </template>
 
 <script setup>
@@ -69,6 +82,11 @@ const tabs = [
   // Add more tabs if needed
 ];
 
+import { useToast } from "primevue/usetoast";
+import { useConfirm } from "primevue/useconfirm";
+const confirm = useConfirm();
+const toast = useToast();
+
 // Reactive states
 const activeTab = ref('teams');
 const createTeamDialogVisible = ref(false);
@@ -77,7 +95,8 @@ const newTeamName = ref('');
 const creatingTeam = ref(false);
 
 const selectedUser = ref(null);
-const selectedTeam = ref(null); // Added for team selection
+const selectedTeam = ref(null);
+var alredySelectedTeam = ref(false);
 const users = ref([]);
 const teams = ref([]); // Added to store teams
 const loadingUsers = ref(false);
@@ -124,13 +143,8 @@ const createTeam = async () => {
   creatingTeam.value = true;
   try {
     await teamsStore.createTeam({ name: newTeamName.value });
-    showToast({
-      severity: 'success',
-      summary: 'Team Created',
-      detail: 'Team has been created successfully.',
-      life: 3000,
-    });
     createTeamDialogVisible.value = false;
+    await teamsStore.fetchTeams(authStore.user.role, authStore.user.id);
     newTeamName.value = '';
   } catch (error) {
     showToast({
@@ -147,12 +161,12 @@ const createTeam = async () => {
 const openCreateTeamDialog = () => {
   createTeamDialogVisible.value = true;
 };
-
-// Open Invite User Modal (from child component)
-const openInviteUserModal = () => {
-  selectedTeam.value = null; // Reset selected team
-  inviteUserDialogVisible.value = true;
-  fetchAllUsersAndTeams();
+const closeDialog = () => {
+  inviteUserDialogVisible.value = false;
+  alredySelectedTeam = false
+};
+const closeCreateteamDialog = () => {
+  createTeamDialogVisible.value = false
 };
 
 // Fetch all users and teams for invitation
@@ -192,12 +206,6 @@ const inviteUser = async () => {
   invitingUser.value = true;
   try {
     await teamsStore.inviteUserToTeam(selectedUser.value, selectedTeam.value);
-    showToast({
-      severity: 'success',
-      summary: 'Invitation Sent',
-      detail: 'User has been invited successfully.',
-      life: 3000,
-    });
     inviteUserDialogVisible.value = false;
     selectedUser.value = null;
     selectedTeam.value = null;
@@ -237,34 +245,43 @@ const handleRejectInvitation = async (token) => {
 };
 
 // Handle inviting a user from TeamsList (e.g., inviting to a specific team)
-const handleInviteUser = (teamId = null) => {
-  selectedTeam.value = teamId;
+// Handle inviting a user from TeamsList (e.g., inviting to a specific team)
+const handleInviteUser = (teamId) => {
+  // If a team ID is provided, select that team automatically
+  selectedTeam.value = teamId ? teamId : null;
+  alredySelectedTeam = teamId ? true  : false;
   inviteUserDialogVisible.value = true;
   fetchAllUsersAndTeams();
 };
 
+
 // Handle deleting a team (from TeamsList)
-const handleDeleteTeam = async (teamId) => {
-  if (confirm('Are you sure you want to delete this team?')) {
-    try {
-      await teamsStore.deleteTeam(teamId);
-      showToast({
-        severity: 'success',
-        summary: 'Team Deleted',
-        detail: 'Team has been deleted successfully.',
-        life: 3000,
-      });
-      // Optionally, refresh teams list
-      await teamsStore.fetchTeams(authStore.user.role, authStore.user.id);
-    } catch (error) {
-      showToast({
-        severity: 'error',
-        summary: 'Error',
-        detail: error.message || 'Failed to delete team.',
-        life: 3000,
-      });
+const handleDeleteTeam = (teamId) => {
+  confirm.require({
+    header: 'Danger Zone',
+    message: 'Do you want to delete this Team?',
+    icon: 'pi pi-info-circle',
+    rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
+    acceptClass: 'p-button-danger p-button-sm',
+    rejectLabel: 'Cancel',
+    acceptLabel: 'Delete',
+    accept: async () => { 
+      try {
+        await teamsStore.deleteTeam(teamId);
+        await teamsStore.fetchTeams(authStore.user.role, authStore.user.id);
+      } catch (error) {
+        showToast({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.message || 'Failed to delete team.',
+          life: 3000,
+        });
+      }
+    },
+    reject: () => {
+      toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected the action', life: 3000 });
     }
-  }
+  });
 };
 
 // On component mount, fetch initial data
@@ -272,10 +289,5 @@ onMounted(() => {
   teamsStore.fetchTeams(authStore.user.role, authStore.user._id);
 });
 </script>
-
-<style scoped>
-/* Add any necessary styling */
-</style>
-
 
 

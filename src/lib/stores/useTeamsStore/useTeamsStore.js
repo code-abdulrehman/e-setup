@@ -7,6 +7,7 @@ export const useTeamsStore = defineStore('teams', {
     teams: [],
     invitations: [],
     loading: false,
+    delete_loading: false,
   }),
   actions: {
     async fetchTeams(role, userId) {
@@ -93,7 +94,7 @@ export const useTeamsStore = defineStore('teams', {
     },
 
     async deleteTeam(teamId) {
-      this.loading = true;
+      this.delete_loading = true;
       try {
         await axiosInstance.delete(`/teams/${teamId}`);
         this.teams = this.teams.filter((team) => team.id !== teamId);
@@ -111,7 +112,7 @@ export const useTeamsStore = defineStore('teams', {
           life: 3000,
         });
       } finally {
-        this.loading = false;
+        this.delete_loading = false;
       }
     },
 
