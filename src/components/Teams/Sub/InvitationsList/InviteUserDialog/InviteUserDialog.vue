@@ -18,7 +18,7 @@
   
   <script setup>
   import { ref, onMounted } from 'vue';
-  import { useUsersStore } from '@/lib/stores/useUsersStore/useUsersStore';
+  import { useUsersStore } from '@/lib/stores/useUsersStore';
   import { showToast } from '@/lib/utils/toast';
   
   const props = defineProps({

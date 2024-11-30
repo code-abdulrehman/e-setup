@@ -70,9 +70,9 @@ import { ref, computed, watch, onMounted } from 'vue';
 import TabsComponent from '@/components/Commons/TabsComponent.vue';
 import TeamsList from '@/components/Teams/Sub/TeamsList/TeamsList.vue';
 import InvitationsList from '@/components/Teams/Sub/InvitationsList/InvitationsList.vue';
-import { useAuthStore } from '@/lib/stores/useAuthStore/useAuthStore';
-import { useTeamsStore } from '@/lib/stores/useTeamsStore/useTeamsStore';
-import { useUsersStore } from '@/lib/stores/useUsersStore/useUsersStore';
+import { useAuthStore } from '@/lib/stores/useAuthStore';
+import { useTeamsStore } from '@/lib/stores/useTeamsStore';
+import { useUsersStore } from '@/lib/stores/useUsersStore';
 import { showToast } from '@/lib/utils/toast';
 
 // Define the tabs dynamically with localization keys

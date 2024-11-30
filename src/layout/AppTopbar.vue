@@ -1,7 +1,7 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from './AppConfigurator.vue';
-import { useAuthStore } from '@/lib/stores/useAuthStore/useAuthStore';
+import { useAuthStore } from '@/lib/stores/useAuthStore';
 import { useRouter } from 'vue-router';
 import { computed } from 'vue';
 const authStore = useAuthStore();

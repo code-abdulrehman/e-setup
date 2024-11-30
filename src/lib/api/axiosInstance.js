@@ -1,7 +1,7 @@
 import axios from 'axios';
 // Removed the toast message import
 // import { message } from 'ant-design-vue';
-import { useAuthStore } from '@/lib/stores/useAuthStore/useAuthStore';
+import { useAuthStore } from '@/lib/stores/useAuthStore';
 
 // Create Axios instance
 const axiosInstance = axios.create({

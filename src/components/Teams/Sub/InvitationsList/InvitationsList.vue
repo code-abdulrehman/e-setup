@@ -35,7 +35,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue';
-import { useTeamsStore } from '@/lib/stores/useTeamsStore/useTeamsStore';
+import { useTeamsStore } from '@/lib/stores/useTeamsStore';
 import { showToast } from '@/lib/utils/toast';
 
 const emit = defineEmits(['accept-invitation', 'reject-invitation']);

@@ -2,7 +2,7 @@
 import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
 import { ref } from 'vue';
 import Peer from 'peerjs';
-import { useAuthStore } from '@/lib/stores/useAuthStore/useAuthStore';
+import { useAuthStore } from '@/lib/stores/useAuthStore';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();

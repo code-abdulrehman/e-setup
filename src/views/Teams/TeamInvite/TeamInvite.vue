@@ -27,7 +27,7 @@
   
   <script>
   import { ref } from 'vue';
-  import { useTeamsStore } from '@/lib/stores/useTeamsStore/useTeamsStore';
+  import { useTeamsStore } from '@/lib/stores/useTeamsStore';
   import { useRoute, useRouter } from 'vue-router';
   
   export default {

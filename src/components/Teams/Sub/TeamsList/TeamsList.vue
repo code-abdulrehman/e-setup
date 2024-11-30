@@ -77,9 +77,9 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
-import { useAuthStore } from '@/lib/stores/useAuthStore/useAuthStore';
-import { useTeamsStore } from '@/lib/stores/useTeamsStore/useTeamsStore';
-import { useUsersStore } from '@/lib/stores/useUsersStore/useUsersStore';
+import { useAuthStore } from '@/lib/stores/useAuthStore';
+import { useTeamsStore } from '@/lib/stores/useTeamsStore';
+import { useUsersStore } from '@/lib/stores/useUsersStore';
 import { useRoute } from 'vue-router';
 const route = useRoute();
 // Emit events for parent component

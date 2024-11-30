@@ -4,7 +4,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
-import { useAuthStore } from '@/lib/stores/useAuthStore/useAuthStore';
+import { useAuthStore } from '@/lib/stores/useAuthStore';
 const authStore = useAuthStore();
 
 const email = ref('');

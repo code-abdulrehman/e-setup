@@ -1,4 +1,3 @@
-// src/components/ChatComponent.vue
 <template>
   <div>
     <h2>Chat</h2>
