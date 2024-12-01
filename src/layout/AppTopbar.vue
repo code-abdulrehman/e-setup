@@ -9,7 +9,7 @@ const authStore = useAuthStore();
 const router = useRouter();
 const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
 const user = computed(() => {
-    const profile = JSON.parse(localStorage.getItem('user'));
+    const profile = JSON.parse(sessionStorage.getItem('user'));
     return profile || {};
 });
 const logout = async()=> {
@@ -73,7 +73,7 @@ c326 -38 617 -167 815 -362 131 -129 206 -271 230 -436 35 -239 -109 -496
                     <AppConfigurator />
                 </div>
                 <div class="relative">
-                    <Avatar :label="user.username[0].toUpperCase()" style="height: 35px; width: 35px;" class="font-bold" shape="circle"/>
+                    <Avatar :label="user.username[0].toUpperCase()" style="height: 35px; width: 35px;" class="font-bold logo-font" shape="circle"/>
                 </div>
                 <div class="relative">
                     <button

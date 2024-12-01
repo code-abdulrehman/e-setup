@@ -7,6 +7,10 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { createPinia } from 'pinia';
+import TabComponent from '@/components/Commons/TabsComponent.vue';
+import Panel from 'primevue/panel';
+import RadioButton from 'primevue/radiobutton';
+import Dialog from 'primevue/dialog';
 
 import '@/assets/styles.scss';
 import '@/assets/tailwind.css';
@@ -25,9 +29,17 @@ app.use(PrimeVue, {
         options: {
             darkModeSelector: '.app-dark'
         }
-    }
+    },
+    ripple: true, 
 });
 app.use(ToastService);
+app.component('TabComponent', TabComponent);
 app.use(ConfirmationService);
+
+// Register the components globally
+app.component('Panel', Panel);
+app.component('RadioButton', RadioButton);
+app.component('Dialog', Dialog);
+
 
 app.mount('#app');

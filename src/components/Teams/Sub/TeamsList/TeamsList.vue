@@ -17,7 +17,7 @@
       <Column field="name" header="Logo" style="width: 4rem;">
         <template #body="{ data }">
           
-          <Avatar :label="data?.name[0].toUpperCase()" class="mr-2" size="large" />
+          <Avatar :label="data?.name[0].toUpperCase()" class="mr-2 logo-font" size="large" />
     </template>
       </Column>
       <Column field="name" header="Team Name">
@@ -41,7 +41,7 @@
           </div>
     </template>
       </Column>
-      <Column field="_id" header="Actions" v-if="canAccessTeam(btnAccess)">
+      <Column field="_id" header="Actions" v-if="canAccessTeam(btnAccess)" style="width: 12rem;">
         <template #body="{ data }">
           <div class="p-d-flex p-ai-center">
             <Button

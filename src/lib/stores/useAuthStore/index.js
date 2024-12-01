@@ -5,7 +5,7 @@ import { defineStore } from 'pinia';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: JSON.parse(localStorage.getItem('user')) || null,
+    user: JSON.parse(sessionStorage.getItem('user')) || null,
     token: sessionStorage.getItem('token') || '',
     loading: false,
     logoutTimer: null,
@@ -65,7 +65,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await axiosInstance.post('/auth/register', userData);
         this.user = response.data.user;
-        localStorage.setItem('user', JSON.stringify(this.user)); // Store user in localStorage
+        sessionStorage.setItem('user', JSON.stringify(this.user)); // Store user in sessionStorage
         showToast({ severity: 'success', summary: 'Registration Successful', detail: 'You have registered successfully.', life: 3000 });
 
       } catch (error) {
@@ -83,9 +83,9 @@ export const useAuthStore = defineStore('auth', {
         this.user = response.data.user;
         this.token = response.data.token;
 
-        // Store token in sessionStorage and user in localStorage
+        // Store token in sessionStorage and user in sessionStorage
         sessionStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(this.user));
+        sessionStorage.setItem('user', JSON.stringify(this.user));
 
         // Set the Authorization header for future requests
         axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
@@ -146,7 +146,7 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.user = null;
       this.token = '';
-      localStorage.removeItem('user');
+      sessionStorage.removeItem('user');
       sessionStorage.removeItem('token');
       delete axiosInstance.defaults.headers.common['Authorization'];
       this.clearLogoutTimer();
