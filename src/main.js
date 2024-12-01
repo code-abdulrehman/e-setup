@@ -11,6 +11,7 @@ import TabComponent from '@/components/Commons/TabsComponent.vue';
 import Panel from 'primevue/panel';
 import RadioButton from 'primevue/radiobutton';
 import Dialog from 'primevue/dialog';
+import ProgressSpinner from 'primevue/progressspinner';
 
 import '@/assets/styles.scss';
 import '@/assets/tailwind.css';
@@ -40,6 +41,7 @@ app.use(ConfirmationService);
 app.component('Panel', Panel);
 app.component('RadioButton', RadioButton);
 app.component('Dialog', Dialog);
+app.component('ProgressSpinner', ProgressSpinner);
 
 
 app.mount('#app');

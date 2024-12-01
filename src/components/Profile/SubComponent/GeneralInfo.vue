@@ -1,4 +1,4 @@
-<!-- ProfileCard.vue -->
+<!-- src/components/Profile/ProfileCard.vue -->
 <template>
   <div class="card">
     <!-- Toggle Button -->
@@ -18,6 +18,7 @@
       <EditProfile 
         v-if="!isPreview" 
         :user="user" 
+        :isLoading="isLoading"
         @saveProfile="handleSaveProfile" 
         @showRoleDialog="handleShowRoleDialog"
       />
@@ -28,12 +29,12 @@
     </div>
 
     <!-- Role Change Dialog (Optional: Can be moved to EditProfile.vue) -->
-    <!-- If you prefer to keep the dialog in the main component, uncomment and adjust accordingly -->
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useProfileStore } from '@/lib/stores/useProfileStore';
 import { useToast } from 'primevue/usetoast';
 
 // PrimeVue Components
@@ -41,59 +42,76 @@ import ToggleButton from 'primevue/togglebutton';
 import EditProfile from '@/components/Profile/SubComponent/SubTab/EditProfile.vue';
 import PublicProfile from '@/components/Profile/SubComponent/SubTab/PublicProfile.vue';
 
-// Initialize Toast
 const toast = useToast();
+const profileStore = useProfileStore();
 
-// User data (populate with your actual data or fetch from API)
-const user = ref({
-  _id: "6744c582aa308befce621018",
-  username: 'super_admin',
-  first_name: 'super',
-  last_name: 'admin',
-  email: 'super@mail.com',
-  skill: 'CEO',
-  expertise: [],
-  per_hour_pay: 0,
-  national_id: '12345-6789012-3',
-  country: 'Pakistan',
-  role: 'super_admin',
-  last_online: '2024-11-26T07:55:00.067Z',
-  peerId: 'f51d289f-c4c1-4e72-9455-2d69947fa4e4',
-  createdAt: '2024-11-25T18:44:18.048Z',
-  updatedAt: '2024-11-30T15:22:38.816Z',
-});
-
-// State to track whether we are in "Edit Profile" or "Public Profile" mode
+// Reactive state for toggle
 const isPreview = ref(true);
+const isLoading = ref(false);
+
+// Computed property to get user data from the store
+const user = computed(() => profileStore.user);
 
 // Handle Save Profile Event from EditProfile Component
-const handleSaveProfile = (updatedUser) => {
-  console.log('Profile saved:', updatedUser);
-  
-  // Simulate API call with a timeout
-  setTimeout(() => {
-    // Update the user data
-    user.value = { ...updatedUser };
-    
-    // Show success toast
+const handleSaveProfile = async (updatedUser) => {
+  isLoading.value = true;
+  try {
+    await profileStore.updateUser(profileStore.user._id, updatedUser);
     toast.add({ 
       severity: 'success', 
       summary: 'Success', 
       detail: 'Profile updated successfully.', 
       life: 3000 
     });
-    
-    // Optionally switch to "Public Profile" mode after saving
-    isPreview.value = true;
-  }, 1000);
-  
-  // In a real application, replace the above setTimeout with an actual API call
+    isPreview.value = true; // Switch to public preview after saving
+  } catch (error) {
+    toast.add({ 
+      severity: 'error', 
+      summary: 'Error', 
+      detail: 'Failed to update profile.', 
+      life: 3000 
+    });
+    console.error(error);
+  }finally{
+    isLoading.value = false;
+  }
 };
 
 // Handle Show Role Dialog Event from EditProfile Component
 const handleShowRoleDialog = () => {
-  // If you choose to manage the role dialog in the main component
-  // Implement the logic here
+  // If the role dialog is managed within EditProfile, this can be empty or handle global dialogs
+};
+
+// Fetch user data if not already fetched
+onMounted(async () => {
+  if (!profileStore.user) {
+    const userId = getUserIdFromSession();
+    if (userId) {
+      await profileStore.fetchUserById(userId);
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Authentication Error',
+        detail: 'User not authenticated.',
+        life: 3000,
+      });
+    }
+  }
+});
+
+// Function to get user ID from session (same as in Profile.vue)
+const getUserIdFromSession = () => {
+  const userSession = sessionStorage.getItem('user');
+  if (userSession) {
+    try {
+      const user = JSON.parse(userSession);
+      return user._id || user.id;
+    } catch (e) {
+      console.error('Failed to parse user session:', e);
+      return null;
+    }
+  }
+  return null;
 };
 </script>
 

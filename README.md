@@ -1,5 +1,7 @@
 # e-setup
+Start first backend on local 5000 port,
 
+            /home/abdul/Desktop/u_manage/backend
 
 ## User
 

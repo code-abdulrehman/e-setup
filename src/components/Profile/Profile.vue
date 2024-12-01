@@ -1,96 +1,231 @@
+<!-- src/components/Profile/Profile.vue -->
 <template>
+  <Spinner v-if="profileStore?.loading" />
+  <div v-else>
+    <!-- Profile Card -->
+    <div class="p-0 m-0 card">  
+      <div
+        class="relative w-full p-4 shadow-md h-44 rounded-t-md"
+        :class="bannerClass"
+        :style="bannerStyle"
+      >
+        <!-- Profile Image -->
+        <div class="absolute w-36 h-36 rounded-full profile-img bg-[var(--surface-card)] top-[23%] border-[var(--surface-card)] border-4 shadow-xl flex justify-center items-center overflow-hidden">
+          <Avatar
+            v-if="profile?.appearance?.profile_img.url"
+            :src="profile?.appearance?.profile_img.url"
+            alt="avatar"
+            class="object-cover"
+            @error="handleImageError"
+          />
+          <Avatar
+            v-else
+            :label="getInitials(profile)"
+            class="logo-font"
+            style="width: 100%; height: 100%; font-size:2rem; background: var(--surface-card);"
+          />
+        </div>
 
-<div class="p-0 m-0 card">  
-  <div class="relative w-full shadow-md h-44 bg-primary rounded-t-md bg-pattern-container pattern-3" style="background-image: url('/public/demo/images/banners/banner-9.jpg');background-size: cover; background-position: center; background-repeat: no-repeat;">
-    
-    <div class="absolute w-36 h-36 translate-x-1/2 rounded-full trasnslate-y-1/2 profile-img bg-[var(--surface-card)] top-[23%] border-[var(--surface-card)] border-4 shadow-xl flex justify-center items-center overflow-hidden">
-      <!-- <img :src="profile.avatar" alt="avatar" class="object-cover"> -->
-      <Avatar :label="profile?.first_name[0].toUpperCase() + profile?.last_name[0].toUpperCase()" class="logo-font" style="width: 100%; height: 100%; font-size:2rem; background: var(--surface-card); " />
+        <!-- Edit Button -->
+        <div class="relative flex justify-end w-full h-4 p-4">   
+          <Button
+            icon="pi pi-pencil"
+            severity="secondary"
+            variant="text"
+            rounded
+            aria-label="Edit Banner"
+            @click="showDialog = true"
+          />
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-    <!-- Use TabsComponent to handle the tabs -->
+    <!-- Tabs Component -->
     <TabsComponent :tabs="tabs" :initialTab="activeTab.id" @tab-selected="onTabChange" />
-  
+
+    <!-- Tab Content -->
     <div class="py-4">
-      <!-- Render Tab Content based on active tab -->
-      <component :is="activeTabComponent" :user="user" />
+      <component :is="activeTabComponent" :user="profile" />
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, computed, markRaw } from 'vue';
-  import TabsComponent from '@/components/Commons/TabsComponent.vue';
-  import GeneralInfo from '@/components/Profile/SubComponent/GeneralInfo.vue';
-  import Payments from '@/components/Profile/SubComponent/Payments.vue';
-  import WorkHistory from '@/components/Profile/SubComponent/WorkHistory.vue';
-  
-  // Simulated user data
-  const user = ref({
-    username: "super_admin",
-    first_name: "super",
-    last_name: "admin",
-    email: "super@mail.com",
-    country: "Pakistan",
-    skill: "CEO",
-  });
-  
-  // Tabs configuration with component references
-  const tabs = [
-    { id: 'general-info', label: 'General Info', icon: 'pi pi-user', component: markRaw(GeneralInfo) },
-    { id: 'payments', label: 'Payments', icon: 'pi pi-dollar', component: markRaw(Payments) },
-    { id: 'work-history', label: 'Work History', icon: 'pi pi-briefcase', component: markRaw(WorkHistory) }
-  ];
-  
-  // Active tab reference
-  const activeTab = ref(tabs[0]);
-  
-  // Handle tab change event
-  const onTabChange = (tabId) => {
-    const selectedTab = tabs.find(tab => tab.id === tabId);
-    if (selectedTab) {
-      activeTab.value = selectedTab;
+
+    <!-- Pattern Dialog Component -->
+    <PatternDialog
+      v-model:visible="showDialog"
+      :totalPatterns="22"
+      :totalImages="4"
+      @banner-selected="handleBannerSelected"
+    />
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, markRaw, onMounted, watch } from 'vue';
+import { useProfileStore } from '@/lib/stores/useProfileStore';
+import TabsComponent from '@/components/Commons/TabsComponent.vue';
+import GeneralInfo from '@/components/Profile/SubComponent/GeneralInfo.vue';
+import Payments from '@/components/Profile/SubComponent/Payments.vue';
+import WorkHistory from '@/components/Profile/SubComponent/WorkHistory.vue';
+import PatternDialog from '@/components/Profile/Dialog/PatternDialog.vue'; // Corrected import path
+import Button from 'primevue/button';
+import Avatar from 'primevue/avatar';
+import Spinner from '@/components/Commons/Spinner.vue'; // Ensure you have a Spinner component
+
+// Initialize the profile store
+const profileStore = useProfileStore();
+
+// Reactive state for dialog visibility
+const showDialog = ref(false);
+
+// Computed property to access the user profile from the store
+const profile = computed(() => profileStore.user);
+
+// Tabs configuration with component references
+const tabs = [
+  { id: 'general-info', label: 'General Info', icon: 'pi pi-user', component: markRaw(GeneralInfo) },
+  { id: 'payments', label: 'Payments', icon: 'pi pi-dollar', component: markRaw(Payments) },
+  { id: 'work-history', label: 'Work History', icon: 'pi pi-briefcase', component: markRaw(WorkHistory) }
+];
+
+// Active tab reference
+const activeTab = ref(tabs[0]);
+
+// Computed property to get the component for the active tab
+const activeTabComponent = computed(() => activeTab.value.component); 
+
+// Handle tab change event
+const onTabChange = (tabId) => {
+  const selectedTab = tabs.find(tab => tab.id === tabId);
+  if (selectedTab) {
+    activeTab.value = selectedTab;
+  }
+};
+
+// Computed property for banner class based on pattern_no
+const bannerClass = computed(() => {
+  return profile.value?.appearance.banner.pattern_no
+    ? `pattern-${profile.value.appearance.banner.pattern_no}`
+    : '';
+});
+
+// Computed property for banner style based on banner_url
+const bannerStyle = computed(() => {
+  if (profile.value?.appearance.banner.banner_url) {
+    return {
+      backgroundImage: `url(${profile.value.appearance.banner.banner_url})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+    };
+  } else {
+    return {}; // Let the class handle the background color
+  }
+});
+
+// Handle image load error by clearing the URL
+const handleImageError = () => {
+  profileStore.updateProfileImage('');
+};
+
+// Function to handle banner selection from the dialog
+const handleBannerSelected = ({ type, value }) => {
+  if (type === 'pattern') {
+    profileStore.updateBannerPattern(value);
+  } else if (type === 'image') {
+    // Assuming you want to send the image index, adjust if you need to send the URL instead
+    const bannerUrl = `/public/demo/images/banners/banner-${value}.jpg`;
+    profileStore.updateBannerImage(bannerUrl);
+  }
+};
+
+// Function to get initials if profile image is missing
+const getInitials = (profile) => {
+  const first = profile?.first_name ? profile.first_name[0].toUpperCase() : '';
+  const last = profile?.last_name ? profile.last_name[0].toUpperCase() : '';
+  return `${first}${last}`;
+};
+
+// Get user ID from session (assuming it's stored in sessionStorage as 'user')
+const getUserIdFromSession = () => {
+  const userSession = sessionStorage.getItem('user');
+  if (userSession) {
+    try {
+      const user = JSON.parse(userSession);
+      return user._id || user.id;
+    } catch (e) {
+      console.error('Failed to parse user session:', e);
+      return null;
     }
-  };
-  
-  // Computed property to get the component for the active tab
-  const activeTabComponent = computed(() => {
-    return activeTab.value.component; // Return the component associated with the active tab
-  });
-  const profile = {
-  username: "abdulrehman",
-  first_name: "ABDULREHMAN",
-  last_name: "kHALIQ",
-  get avatar() {
-    // return `https://placehold.co/120x120?font=roboto&text=test`;
-    return `https://placehold.co/120x120?font=roboto&text=${this.first_name[0]}+${this.last_name[0]}`;
-  },
-  phone: "09902222231",
-  links: ["https://github.com", "https://linkedin.com","https://code-abdulrehman.netlify.app"],
-  per_hour_pay: 45,
-  email: "code.abdulrehman@gmail.com",
-  country: "Pakistan",
-  peerId: "jsfuewfnewufnew_3434--34-43-34#_$",
-  last_online: "2022-01-01T00:00:00.000Z",
-  skill: "Full Stack Developer",
-  expertise: ["React", "Git", "Vue", "Node", "Express", "Mongo"],
-  bg_image: `.pattern {
-  --s: 202px; 
-  --c1: #f6edb3;
-  --c2: #acc4a3;
-  --c3: #55897c;
-  
-  --_l:#0000 calc(25%/3),var(--c1) 0 25%,#0000 0;
-  --_g:conic-gradient(from 120deg at 50% 87.5%,var(--c1) 120deg,#0000 0);
-  background:
-    var(--_g),var(--_g) 0 calc(var(--s)/2),
-    conic-gradient(from 180deg at 75%,var(--c2) 60deg,#0000 0),
-    conic-gradient(from 60deg at 75% 75%,var(--c1) 0 60deg,#0000 0),
-    linear-gradient(150deg,var(--_l)) 0 calc(var(--s)/2),
-    conic-gradient(at 25% 25%,#0000 50%,var(--c2) 0 240deg,var(--c1) 0 300deg,var(--c2) 0),
-    linear-gradient(-150deg,var(--_l)) var(--c3);
-  background-size: calc(0.866*var(--s)) var(--s);
-}`
+  }
+  return null;
+};
+
+// Fetch user profile on component mount
+onMounted(async () => {
+  const userId = getUserIdFromSession();
+  console.log(userId, "userId")
+  if (userId) {
+    await profileStore.fetchUserById(userId);
+  } else {
+    profileStore.showToast({
+      severity: 'error',
+      summary: 'Authentication Error',
+      detail: 'User not authenticated.',
+      life: 3000,
+    });
+  }
+});
+
+// Watch for changes in the store's user data
+watch(() => profileStore.user, (newUser) => {
+  // Any additional logic when user data changes can be added here
+});
+</script>
+
+<style scoped>
+.selection-section {
+  margin-bottom: 20px;
 }
-  </script>
+
+.selection-section h3 {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.pattern-box, .image-box {
+  cursor: pointer;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.pattern-box.selected, .image-box.selected {
+  border: 6px dashed #007bff;
+}
+
+.image-box {
+  background-size: cover;
+  background-position: center;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+</style>
