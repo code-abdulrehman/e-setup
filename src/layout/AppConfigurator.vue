@@ -3,7 +3,7 @@ import { useLayout } from '@/layout/composables/layout';
 import { $t, updatePreset, updateSurfacePalette } from '@primevue/themes';
 import Aura from '@primevue/themes/aura';
 import Lara from '@primevue/themes/lara';
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 
 const { layoutConfig, setPrimary, setSurface, setPreset, isDarkTheme, setMenuMode } = useLayout();
 
@@ -22,13 +22,13 @@ const menuModeOptions = ref([
 
 const primaryColors = ref([
     { name: 'noir', palette: {} },
-    { name: 'emerald', palette: { 50: '#ecfdf5', 100: '#d1fae5', 200: '#a7f3d0', 300: '#6ee7b7', 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857', 800: '#065f46', 900: '#064e3b', 950: '#022c22' } },
-    { name: 'green', palette: { 50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 300: '#86efac', 400: '#4ade80', 500: '#22c55e', 600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#14532d', 950: '#052e16' } },
-    { name: 'lime', palette: { 50: '#f7fee7', 100: '#ecfccb', 200: '#d9f99d', 300: '#bef264', 400: '#a3e635', 500: '#84cc16', 600: '#65a30d', 700: '#4d7c0f', 800: '#3f6212', 900: '#365314', 950: '#1a2e05' } },
+    { name: 'teal', palette: { 50: '#f0fdfa', 100: '#ccfbf1', 200: '#99f6e4', 300: '#5eead4', 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e', 800: '#115e59', 900: '#134e4a', 950: '#042f2e' } },
     { name: 'orange', palette: { 50: '#fff7ed', 100: '#ffedd5', 200: '#fed7aa', 300: '#fdba74', 400: '#fb923c', 500: '#f97316', 600: '#ea580c', 700: '#c2410c', 800: '#9a3412', 900: '#7c2d12', 950: '#431407' } },
     { name: 'amber', palette: { 50: '#fffbeb', 100: '#fef3c7', 200: '#fde68a', 300: '#fcd34d', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706', 700: '#b45309', 800: '#92400e', 900: '#78350f', 950: '#451a03' } },
     { name: 'yellow', palette: { 50: '#fefce8', 100: '#fef9c3', 200: '#fef08a', 300: '#fde047', 400: '#facc15', 500: '#eab308', 600: '#ca8a04', 700: '#a16207', 800: '#854d0e', 900: '#713f12', 950: '#422006' } },
-    { name: 'teal', palette: { 50: '#f0fdfa', 100: '#ccfbf1', 200: '#99f6e4', 300: '#5eead4', 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e', 800: '#115e59', 900: '#134e4a', 950: '#042f2e' } },
+    { name: 'green', palette: { 50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 300: '#86efac', 400: '#4ade80', 500: '#22c55e', 600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#14532d', 950: '#052e16' } },
+    { name: 'lime', palette: { 50: '#f7fee7', 100: '#ecfccb', 200: '#d9f99d', 300: '#bef264', 400: '#a3e635', 500: '#84cc16', 600: '#65a30d', 700: '#4d7c0f', 800: '#3f6212', 900: '#365314', 950: '#1a2e05' } },
+    { name: 'emerald', palette: { 50: '#ecfdf5', 100: '#d1fae5', 200: '#a7f3d0', 300: '#6ee7b7', 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857', 800: '#065f46', 900: '#064e3b', 950: '#022c22' } },
     { name: 'cyan', palette: { 50: '#ecfeff', 100: '#cffafe', 200: '#a5f3fc', 300: '#67e8f9', 400: '#22d3ee', 500: '#06b6d4', 600: '#0891b2', 700: '#0e7490', 800: '#155e75', 900: '#164e63', 950: '#083344' } },
     { name: 'sky', palette: { 50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1', 800: '#075985', 900: '#0c4a6e', 950: '#082f49' } },
     { name: 'blue', palette: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554' } },
@@ -166,6 +166,7 @@ function getPresetExt() {
 }
 
 function updateColors(type, color) {
+    console.log('color',color,'\n', "type",type)
     if (type === 'primary') {
         setPrimary(color.name);
     } else if (type === 'surface') {
@@ -194,6 +195,56 @@ function onPresetChange() {
 function onMenuModeChange() {
     setMenuMode(menuMode.value);
 }
+
+
+
+// Initialize theme on component mount
+onMounted(() => {
+    // Apply default primary color
+    const defaultPrimary = primaryColors.value.find(c => c.name === layoutConfig.primary);
+    if (defaultPrimary) {
+        applyTheme('primary', defaultPrimary);
+    } else {
+        console.warn(`Default primary color '${layoutConfig.primary}' not found.`);
+    }
+
+    // Apply default surface color if any
+    if (layoutConfig.surface) {
+        const defaultSurface = surfaces.value.find(s => s.name === layoutConfig.surface);
+        if (defaultSurface) {
+            applyTheme('surface', defaultSurface);
+        } else {
+            console.warn(`Default surface color '${layoutConfig.surface}' not found.`);
+        }
+    } else {
+        // Set a default surface if none is set
+        const defaultSurface = surfaces.value.find(s => s.name === 'ocean');
+        if (defaultSurface) {
+            setSurface(defaultSurface.name);
+            applyTheme('surface', defaultSurface);
+        } else {
+            console.warn("Default surface 'slate' not found.");
+        }
+    }
+
+    // Apply preset
+    onPresetChange();
+});
+
+// Optional: Watchers to reactively apply theme changes if layoutConfig changes externally
+watch(() => layoutConfig.primary, (newVal, oldVal) => {
+    const newColor = primaryColors.value.find(c => c.name === newVal);
+    if (newColor) {
+        applyTheme('primary', newColor);
+    }
+});
+
+watch(() => layoutConfig.surface, (newVal, oldVal) => {
+    const newSurface = surfaces.value.find(s => s.name === newVal);
+    if (newSurface) {
+        applyTheme('surface', newSurface);
+    }
+});
 </script>
 
 <template>
@@ -202,8 +253,8 @@ function onMenuModeChange() {
     >
         <div class="flex flex-col gap-4">
             <div>
-                <span class="text-sm text-muted-color font-semibold">Primary</span>
-                <div class="pt-2 flex gap-2 flex-wrap justify-between">
+                <span class="text-sm font-semibold text-muted-color">Primary</span>
+                <div class="flex flex-wrap justify-between gap-2 pt-2">
                     <button
                         v-for="primaryColor of primaryColors"
                         :key="primaryColor.name"
@@ -216,8 +267,8 @@ function onMenuModeChange() {
                 </div>
             </div>
             <div>
-                <span class="text-sm text-muted-color font-semibold">Surface</span>
-                <div class="pt-2 flex gap-2 flex-wrap justify-between">
+                <span class="text-sm font-semibold text-muted-color">Surface</span>
+                <div class="flex flex-wrap justify-between gap-2 pt-2">
                     <button
                         v-for="surface of surfaces"
                         :key="surface.name"
@@ -233,11 +284,11 @@ function onMenuModeChange() {
                 </div>
             </div>
             <div class="flex flex-col gap-2">
-                <span class="text-sm text-muted-color font-semibold">Presets</span>
+                <span class="text-sm font-semibold text-muted-color">Presets</span>
                 <SelectButton v-model="preset" @change="onPresetChange" :options="presetOptions" :allowEmpty="false" />
             </div>
             <div class="flex flex-col gap-2">
-                <span class="text-sm text-muted-color font-semibold">Menu Mode</span>
+                <span class="text-sm font-semibold text-muted-color">Menu Mode</span>
                 <SelectButton v-model="menuMode" @change="onMenuModeChange" :options="menuModeOptions" :allowEmpty="false" optionLabel="label" optionValue="value" />
             </div>
         </div>

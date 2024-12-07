@@ -15,7 +15,7 @@ export const useTeamsStore = defineStore('teams', {
       try {
         let endpoint = '/teams';
         if (role === 'admin') {
-          endpoint = `/teams/admin/${userId}`;
+          endpoint = `/teams`;
         }
         const response = await axiosInstance.get(endpoint);
         this.teams = response.data.data;
@@ -53,7 +53,7 @@ export const useTeamsStore = defineStore('teams', {
     async createTeam(teamData) {
       try {
         const response = await axiosInstance.post('/teams', teamData);
-        this.teams.push(response.data.team);
+        this.teams.push(response.data.data.data);
         showToast({
           severity: 'success',
           summary: 'Team Created',
@@ -119,7 +119,7 @@ export const useTeamsStore = defineStore('teams', {
     // Additional actions for accepting/rejecting invitations
     async acceptInvitation(token) {
       try {
-        await axiosInstance.put(`/teams/invitations/accept/${token}`);
+        await axiosInstance.post(`/teams/invite/accept/${token}`);
         showToast({
           severity: 'success',
           summary: 'Invitation Accepted',
@@ -143,7 +143,7 @@ export const useTeamsStore = defineStore('teams', {
 
     async rejectInvitation(token) {
       try {
-        await axiosInstance.put(`/teams/invitations/reject/${token}`);
+        await axiosInstance.post(`/teams/invite/reject/${token}`);
         showToast({
           severity: 'info',
           summary: 'Invitation Rejected',

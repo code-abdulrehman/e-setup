@@ -77,15 +77,15 @@ c326 -38 617 -167 815 -362 131 -129 206 -271 230 -436 35 -239 -109 -496
                         <span class="font-medium text-muted-color">Sign in to continue</span>
                     </div>
 
-                    <div>
+                    <div class="w-full md:min-w-[30rem]">
                         <label for="email1"
                             class="block mb-2 text-xl font-medium text-surface-900 dark:text-surface-0">Email</label>
-                        <InputText id="email1" type="text" placeholder="Email address" class="w-full md:w-[30rem] mb-8"
-                            v-model="email" />
+                        <InputText id="email1" type="text" placeholder="Email address" class="w-full mb-8"
+                            v-model.trim="email" />
 
                         <label for="password1"
                             class="block mb-2 text-xl font-medium text-surface-900 dark:text-surface-0">Password</label>
-                        <Password id="password1" v-model="password" placeholder="Password" :toggleMask="true"
+                        <Password id="password1" v-model.trim="password" placeholder="Password" :toggleMask="true"
                             class="mb-4" fluid :feedback="false"></Password>
 
                         <div class="flex items-center justify-between gap-8 mt-2 mb-8">

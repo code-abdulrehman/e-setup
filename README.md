@@ -7,18 +7,21 @@ Start first backend on local 5000 port,
 
 > Super admin
 
-    super@mail.com
-    12345678
+    superadmin@setup.org
+    password
 
 ---
 
 > Admin
 
-    admin@mail.com
-    12345678
+    admin@setup.org
+    password
 
 ---
 > User
 
-    test@mail.com
-    12345678
+    user@setup.org
+    user1@setup.org
+    user2@setup.org
+    user3@setup.org
+    password

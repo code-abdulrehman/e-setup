@@ -64,7 +64,7 @@ const handleSignUp = async () => {
     <div class="flex flex-col items-center justify-center">
       <div
         style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
-        <div class="w-full px-8 py-20 bg-surface-0 dark:bg-surface-900 sm:px-20" style="border-radius: 53px">
+        <div class="w-full px-6 py-8 bg-surface-0 dark:bg-surface-900 sm:px-20" style="border-radius: 53px">
           <div class="mb-8 text-center">
             <svg version="1.0" xmlns="http://www.w3.org/2000/svg" class="w-16 mx-auto mb-8 shrink-0"
                             viewBox="0 0 736.000000 736.000000" preserveAspectRatio="xMidYMid meet">
@@ -81,7 +81,7 @@ const handleSignUp = async () => {
             </span>
           </div>
 
-          <div>
+          <div class="w-full md:min-w-[30rem]">
             <div class="flex flex-wrap w-full gap-4 md:flex-nowrap">
               <div  class="w-full mb-4 md:w-1/2">
                 <label for="firstname" class="block mb-2 text-xl font-medium text-surface-900 dark:text-surface-0">First Name</label>
@@ -90,7 +90,7 @@ const handleSignUp = async () => {
                   type="text"
                   placeholder="First Name"
                 class="w-full"
-                  v-model="firstname"
+                  v-model.trim="firstname"
                 />
               </div>
               <div  class="w-full mb-4 md:w-1/2">
@@ -101,7 +101,7 @@ const handleSignUp = async () => {
                   type="text"
                   placeholder="Last Name"
                   class="w-full"
-                  v-model="lastname"
+                  v-model.trim="lastname"
                 />
               </div>
 
@@ -116,7 +116,7 @@ const handleSignUp = async () => {
               type="text"
               placeholder="@username"
               class="w-full"
-              v-model="username"
+              v-model.trim="username"
             />
               </div>
               <div  class="w-full mb-4 md:w-1/2">
@@ -126,7 +126,7 @@ const handleSignUp = async () => {
               type="email"
               placeholder="Email address"
               class="w-full"
-              v-model="email"
+              v-model.trim="email"
             />
               </div>
               </div>
@@ -134,7 +134,7 @@ const handleSignUp = async () => {
             <label for="password" class="block mb-2 text-xl font-medium text-surface-900 dark:text-surface-0">Password</label>
             <Password
               id="password"
-              v-model="password"
+              v-model.trim="password"
               placeholder="Password"
               :toggleMask="true"
               class="mb-4" fluid
@@ -147,7 +147,7 @@ const handleSignUp = async () => {
                 <label for="country" class="block mb-2 text-xl font-medium text-surface-900 dark:text-surface-0">Country</label>
             <Dropdown
               id="country"
-              v-model="country"
+              v-model.trim="country"
               :options="countries"
               optionLabel="label"
               placeholder="Select a Country"
@@ -161,7 +161,7 @@ const handleSignUp = async () => {
               type="text"
               placeholder="Enter your skills"
               class="w-full"
-              v-model="skill"
+              v-model.trim="skill"
             />
               </div>
             </div>
@@ -172,7 +172,7 @@ const handleSignUp = async () => {
               type="text"
               placeholder="National ID"
               class="w-full md:min-w-[30rem] mb-8"
-              v-model="national_id"
+              v-model.trim="national_id"
             />
 
             <Button

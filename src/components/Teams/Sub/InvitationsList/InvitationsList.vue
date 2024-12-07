@@ -1,3 +1,4 @@
+<!-- src/components/Teams/Sub/InvitationsList/InvitationsList.vue -->
 <template>
   <div>
     <DataTable
@@ -6,26 +7,53 @@
       :rows="10"
       :rowsPerPageOptions="[5, 10, 20, 50]"
       responsiveLayout="scroll"
+      :loading="loading"
     >
+      <template #empty>
+        <h3 class="flex items-center justify-center w-full">No invitations found.</h3>
+      </template>
       <Column field="teamName" header="Team Name" />
-      <Column field="createdBy" header="To">
+      <Column field="toUsername" header="To" v-if="userRole !== 'user'">
         <template #body="{ data }">
-          @{{ data.createdBy }}
+          <b>@</b>{{ data?.username }}
+        </template>
+      </Column>
+      <Column field="fromUsername" header="From">
+        <template #body="{ data }">
+          <b>@</b>{{ data?.createdBy?.username }}
+        </template>
+      </Column>
+      <Column field="status" header="Status">
+        <template #body="{ data }">
+          <Tag v-if="data?.status === 'pending'" severity="info" rounded>{{ data?.status }}</Tag>
+          <Tag v-else-if="data?.status === 'accepted'" severity="success" rounded>{{ data?.status }}</Tag>
+          <Tag v-else-if="data?.status === 'rejected'" severity="warn" rounded>{{ data?.status }}</Tag>
+          <Tag v-else-if="data?.status === 'expired'" severity="danger" rounded>{{ data?.status }}</Tag>
+          <Tag v-else severity="contrast" rounded>{{ data?.status }}</Tag>
         </template>
       </Column>
       <Column header="Actions">
-        <template #body="slotProps">
-          <div class="p-d-flex p-ai-center">
+        <template #body="{ data }">
+          <div class="p-d-flex p-ai-center" v-if="data?.status === 'pending'">
             <Button
               label="Accept"
               class="p-button-primary p-mr-2"
-              @click="handleAccept(slotProps.data.token)"
+              @click="$emit('accept-invitation', data?.token)"
+              v-if="userRole === 'user'"
             />
             <Button
               label="Reject"
               class="p-button-danger"
-              @click="handleReject(slotProps.data.token)"
+              @click="$emit('reject-invitation', data?.token)"
             />
+          </div>
+          <div class="flex items-center justify-center w-1/2 p-d-flex p-ai-center" v-else>
+            <!-- <Button
+              label="Accept"
+              class="p-button-primary p-mr-2"
+              @click="$emit('accept-invitation', data?.token)"
+            /> -->
+            - -
           </div>
         </template>
       </Column>
@@ -34,93 +62,25 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue';
-import { useTeamsStore } from '@/lib/stores/useTeamsStore';
-import { showToast } from '@/lib/utils/toast';
+import { defineProps, computed } from 'vue';
+
+const props = defineProps({
+  invitations: {
+    type: Array,
+    required: true,
+  },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
+  userRole: {
+    type: String,
+  }
+});
 
 const emit = defineEmits(['accept-invitation', 'reject-invitation']);
-const teamsStore = useTeamsStore();
 
-// Log teamsStore to ensure it's initialized correctly
-console.log('Teams Store:', teamsStore);
-
-// Ensure teamsStore data is available
-const teams = computed(() => {
-  console.log('Teams Store Data:', teamsStore.teams);
-  return teamsStore.teams;
-});
-
-// Making invitations a computed property
-const invitations = computed(() => {
-  // Ensure teamsStore and data are available
-  if (!teamsStore || !teamsStore.invitations) {
-    console.log('TeamsStore or teamsStore.data is not available');
-    return [];
-  }
-
-  // Extract invitations from the "to" array safely
-  const toInvitations = Array.isArray(teamsStore.invitations.to)
-    ? teamsStore.invitations.to.map(user => {
-        // Direct invitations from each user in "to"
-        const directInvitation = {
-          teamName: null,
-          createdBy: user.username,
-          token: user.invitationToken
-        };
-
-        // Invitations found in user's "invitations" array, if available
-        const additionalInvitations = Array.isArray(user.invitations)
-          ? user.invitations.map(invite => ({
-              teamName: invite.teamName,
-              createdBy: invite.createdBy?.username,
-              token: invite.invitationToken
-            }))
-          : [];
-
-        return [directInvitation, ...additionalInvitations];
-      })
-    : [];
-
-  // Extract invitations from the "from" team invites safely
-  const fromInvitations = Array.isArray(teamsStore.invitations.from?.teamInvites)
-    ? teamsStore.invitations.from.teamInvites.map(invite => ({
-        teamName: invite.teamName,
-        createdBy: invite.createdBy?.username,
-        token: invite.invitationToken
-      }))
-    : [];
-
-  // Merging both arrays
-  const combinedInvitations = [ ...fromInvitations];
-  console.log('Combined Invitations:', combinedInvitations);
-  console.log('toInvitations Invitations:', toInvitations);
-
-  return combinedInvitations;
-});
-
-
-const paginator = ref(false); // Default value
-
-// Watch teams to update paginator
-watch(invitations, (newInvitations) => {
-  paginator.value = newInvitations.length > 10;
-});
-
-// Watch invitations to ensure it changes
-watch(invitations, (newInvitations) => {
-  console.log('Updated Invitations:', newInvitations);
-}, { immediate: true });
-
-const handleAccept = (token) => {
-  emit('accept-invitation', token);
-  showToast('Invitation accepted.', 'success');
-};
-
-const handleReject = (token) => {
-  emit('reject-invitation', token);
-  showToast('Invitation rejected.', 'error');
-};
-
+const paginator = computed(() => props.invitations.length > 10);
 </script>
 
 <style scoped>

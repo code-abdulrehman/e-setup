@@ -78,7 +78,6 @@ export const useAuthStore = defineStore('auth', {
     async loginUser(credentials) {
       this.loading = true;
       try {
-        this.loading = true;
         const response = await axiosInstance.post('/auth/login', credentials);
         this.user = response.data.user;
         this.token = response.data.token;

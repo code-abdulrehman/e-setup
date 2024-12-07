@@ -79,7 +79,7 @@ c326 -38 617 -167 815 -362 131 -129 206 -271 230 -436 35 -239 -109 -496
             </span>
           </div>
 
-          <div>
+          <div class="w-full md:min-w-[30rem]">
             <label for="new-password" class="block mb-2 text-xl font-medium text-surface-900 dark:text-surface-0">New Password</label>
             <Password
               id="new-password"
