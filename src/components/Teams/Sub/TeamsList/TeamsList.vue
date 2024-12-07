@@ -2,15 +2,16 @@
 <template>
   <div>
     <!-- Action Buttons -->
-    <Toolbar v-if="btnAccess">
-      <template #start>
-        <Button label="Create Team" icon="pi pi-plus" @click="$emit('open-create-team')" />
-      </template>
-      <template #end>
-        <Button label="Invite User" icon="pi pi-user-plus" class="p-ml-2" @click="$emit('open-invite-user')" />
-      </template>
-    </Toolbar>
-    <div class="py-4"></div>
+     <div  class="pb-8" v-if="btnAccess">    
+       <Toolbar>
+         <template #start>
+           <Button label="Create Team" icon="pi pi-plus" @click="$emit('open-create-team')" />
+         </template>
+         <template #end>
+           <Button label="Invite User" icon="pi pi-user-plus" class="p-ml-2" @click="$emit('open-invite-user')" />
+         </template>
+       </Toolbar>
+     </div>
     <div v-if="teams.length">
       <!-- Teams Data Table -->
       <DataTable
@@ -48,7 +49,7 @@
             </div>
           </template>
         </Column>
-        <Column field="_id" header="Actions" style="width: 12rem;">
+        <Column field="_id" header="Actions" style="width: 12rem;" v-if="userRole !== 'user'">
           <template #body="{ data }">
             <div class="p-d-flex p-ai-center">
               <span v-if="canAccessTeam(data)">

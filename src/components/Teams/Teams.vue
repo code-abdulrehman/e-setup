@@ -9,7 +9,7 @@
       <component
         :is="currentComponent"
         :teams="teamsStore.teams"
-        :invitations="teamsStore.invitations.to"
+        :invitations="teamsStore.invitations"
         :loading="teamsStore.loading"
         :userRole="authStore.user.role"
         :userId="authStore.user._id"
@@ -112,6 +112,7 @@ const openCreateTeamDialog = () => {
 };
 
 const handleTeamCreated = async (newTeam) => {
+  createTeamDialogVisible.value = true;
   try {
     await teamsStore.createTeam(newTeam);
     toast.add({
@@ -128,6 +129,8 @@ const handleTeamCreated = async (newTeam) => {
       detail: error.response?.data?.message || error.message || 'Failed to create team.',
       life: 3000,
     });
+  }finally{
+    createTeamDialogVisible.value = false;
   }
 };
 

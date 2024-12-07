@@ -5,8 +5,8 @@ export const generateRandomId =() => {
   }
 
 
-  export const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  export const formatDate = (dateString, month='long') => {
+    const options = { year: 'numeric', month: month, day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
   

@@ -2,7 +2,8 @@
 <template>
   <div>
     <DataTable
-      :value="invitations"
+    v-model:selection="selectedInvite" selectionMode="single" 
+      :value="invitations?.to"
       :paginator="paginator"
       :rows="10"
       :rowsPerPageOptions="[5, 10, 20, 50]"
@@ -30,6 +31,11 @@
           <Tag v-else-if="data?.status === 'rejected'" severity="warn" rounded>{{ data?.status }}</Tag>
           <Tag v-else-if="data?.status === 'expired'" severity="danger" rounded>{{ data?.status }}</Tag>
           <Tag v-else severity="contrast" rounded>{{ data?.status }}</Tag>
+        </template>
+      </Column>
+      <Column field="expireAt" header="Expire At">
+        <template #body="{ data }">
+          {{formatDate(data.expireAt, month='short')}}
         </template>
       </Column>
       <Column header="Actions">
@@ -62,7 +68,8 @@
 </template>
 
 <script setup>
-import { defineProps, computed } from 'vue';
+import { formatDate } from '@/lib/utils/helper';
+import { defineProps, computed, ref } from 'vue';
 
 const props = defineProps({
   invitations: {
@@ -79,7 +86,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['accept-invitation', 'reject-invitation']);
-
+const selectedInvite = ref();
 const paginator = computed(() => props.invitations.length > 10);
 </script>
 

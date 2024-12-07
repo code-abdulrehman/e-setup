@@ -77,7 +77,7 @@ export const useTeamsStore = defineStore('teams', {
         showToast({
           severity: 'success',
           summary: 'Invitation Sent',
-          detail: 'User has been invited successfully.',
+          detail: response?.data?.message || 'User has been invited successfully.',
           life: 3000,
         });
         // Optionally, update the invitations list
