@@ -25,6 +25,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  dialogLoading: {
+    type: Boolean,
+    required: true,
+  },
 });
 
 const emit = defineEmits(['update:visible', 'team-created']);
@@ -42,8 +46,8 @@ const submitCreateTeam = () => {
   emit('team-created', { name: teamName.value });
   // Reset state
   teamName.value = '';
-  loading.value = false;
   emit('update:visible', false);
+  loading.value = false;
 };
 
 const onHide = () => {

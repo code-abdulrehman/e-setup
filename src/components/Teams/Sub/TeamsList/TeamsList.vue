@@ -12,7 +12,7 @@
          </template>
        </Toolbar>
      </div>
-    <div v-if="teams.length">
+    <div>
       <!-- Teams Data Table -->
       <DataTable
         :value="teams"
@@ -22,6 +22,10 @@
         :rows="10"
         :rowsPerPageOptions="[5, 10, 20, 50]"
       >
+      <template #empty>
+          <DataNotFound :message="'No teams found.'"/>
+      </template>
+      
         <Column field="name" header="Logo" style="width: 4rem;">
           <template #body="{ data }">
             <Avatar :label="data?.name[0].toUpperCase()" class="mr-2 logo-font" size="large" />
@@ -70,19 +74,14 @@
           </template>
         </Column>
 
-        <template #empty>
-          <h3 class="flex items-center justify-center w-full">No teams available.</h3>
-        </template>
       </DataTable>
-    </div>
-    <div v-else>
-      <h3 class="flex items-center justify-center w-full">No teams found.</h3>
     </div>
   </div>
 </template>
 
 <script setup>
-import { defineProps, computed } from 'vue';
+import DataNotFound from '@/components/Commons/DataNotFound.vue';
+import { computed, defineProps } from 'vue';
 
 const props = defineProps({
   teams: {

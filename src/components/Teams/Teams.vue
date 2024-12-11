@@ -2,29 +2,31 @@
 <template>
   <div>
     <!-- Reusable Tabs Component -->
-    <TabsComponent :tabs="tabs" @tab-selected="handleTabSelection" />
+    <TabsComponent :tabs="tabs" @tab-selected="handleTabSelection"/>
 
-    <!-- Content based on selected tab -->
+    <!-- Content based on selected tab via nested routes -->
     <div class="p-mt-4">
-      <component
-        :is="currentComponent"
+      <router-view
         :teams="teamsStore.teams"
         :invitations="teamsStore.invitations"
         :loading="teamsStore.loading"
+        :loadingTeams="teamsStore.loading"
         :userRole="authStore.user.role"
         :userId="authStore.user._id"
         @open-create-team="openCreateTeamDialog"
-        @invite-user="openInviteUserDialog"
         @open-invite-user="openInviteUserDialog"
+        @invite-user="openInviteUserDialog"
         @delete-team="handleDeleteTeam"
         @accept-invitation="handleAcceptInvitation"
         @reject-invitation="handleRejectInvitation"
+        @decline-invitation="handleDeclineInvitation"
       />
     </div>
 
     <!-- Create Team Dialog -->
     <CreateTeamDialog
       :visible="createTeamDialogVisible"
+      :dialogLoading="loading"
       @update:visible="createTeamDialogVisible = $event"
       @team-created="handleTeamCreated"
     />
@@ -35,6 +37,7 @@
       :teams="teamsStore.teams"
       :users="usersStore.users"
       :loadingUsers="usersStore.loadingUsers"
+      :selectedTeamId="selectedTeamId"
       @update:visible="inviteUserDialogVisible = $event"
       @user-invited="handleUserInvited"
     />
@@ -47,8 +50,6 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import TabsComponent from '@/components/Commons/TabsComponent.vue';
-import TeamsList from '@/components/Teams/Sub/TeamsList/TeamsList.vue';
-import InvitationsList from '@/components/Teams/Sub/InvitationsList/InvitationsList.vue';
 import CreateTeamDialog from '@/components/Dialogs/CreateTeamDialog.vue';
 import InviteUserDialog from '@/components/Dialogs/InviteUserDialog.vue';
 import { useAuthStore } from '@/lib/stores/useAuthStore';
@@ -56,40 +57,67 @@ import { useTeamsStore } from '@/lib/stores/useTeamsStore';
 import { useUsersStore } from '@/lib/stores/useUsersStore';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
+import { useRoute, useRouter } from 'vue-router';
 
 const confirm = useConfirm();
 const toast = useToast();
+const selectedTeamId = ref(null);
+const loading = ref(false);
 
-// Define the tabs
+// Define the tabs with corresponding routes
 const tabs = [
-  { id: 'teams', label: 'Teams', icon: 'pi pi-users' },
-  { id: 'invitations', label: 'Invitations', icon: 'pi pi-inbox' },
+  { id: 'teams', label: 'Teams', icon: 'pi pi-users', route: { name: 'TeamsList' } },
+  { id: 'invitations', label: 'Invitations', icon: 'pi pi-inbox', route: { name: 'Invitations' } },
   // Add more tabs if needed
 ];
-
-// Reactive states
-const activeTab = ref('teams');
-const createTeamDialogVisible = ref(false);
-const inviteUserDialogVisible = ref(false);
 
 // Store instances
 const authStore = useAuthStore();
 const teamsStore = useTeamsStore();
 const usersStore = useUsersStore();
 
-// Current component to display based on active tab
-const currentComponent = computed(() => {
-  if (activeTab.value === 'teams') return TeamsList;
-  if (activeTab.value === 'invitations') return InvitationsList;
-  return null;
-});
+// Router instances
+const route = useRoute();
+const router = useRouter();
 
-// Handle tab selection
+// Handle tab selection by navigating to the corresponding route
 const handleTabSelection = (tabId) => {
-  activeTab.value = tabId;
+  const selectedTab = tabs.find(tab => tab.id === tabId);
+  console.log(selectedTab, 'selectedTab')
+  if (selectedTab && selectedTab.route) {
+    router.push(selectedTab.route);
+  }
 };
 
-// Fetch data based on active tab
+// Synchronize active tab with current route
+const activeTab = computed(() => {
+  const currentRouteName = route.name;
+  console.log(currentRouteName, 'currentRouteName')
+  const matchingTab = tabs.find(tab => tab.route.name === currentRouteName);
+  console.log(matchingTab, 'matchingTab')
+  // handleTabSelection(matchingTab ? matchingTab.id : tabs[1].id)
+  return matchingTab ? matchingTab.id : tabs[0].id;
+});
+
+// Watch for route changes to update the active tab
+watch(
+  () => router.currentRoute.value.name,
+  async (newRouteName) => {
+    if (newRouteName === 'TeamsList' || newRouteName === 'Teams') {
+      if (teamsStore.teams.length === 0) {
+        await teamsStore.fetchTeams(authStore.user.role, authStore.user._id);
+      }
+    } else if (newRouteName === 'Invitations' || newRouteName === 'Invitations-token') {
+      if (teamsStore.invitations.length === 0) {
+        await teamsStore.fetchInvitations();
+      }
+    }
+  },
+  { immediate: true }
+);
+
+
+// Fetch data based on current tab
 watch(
   activeTab,
   async (newTab) => {
@@ -98,6 +126,7 @@ watch(
         await teamsStore.fetchTeams(authStore.user.role, authStore.user._id);
       }
     } else if (newTab === 'invitations') {
+      console.log(newTab, 'newtab')
       if (teamsStore.invitations.length === 0) {
         await teamsStore.fetchInvitations();
       }
@@ -112,7 +141,7 @@ const openCreateTeamDialog = () => {
 };
 
 const handleTeamCreated = async (newTeam) => {
-  createTeamDialogVisible.value = true;
+  loading.value = true;
   try {
     await teamsStore.createTeam(newTeam);
     toast.add({
@@ -129,13 +158,15 @@ const handleTeamCreated = async (newTeam) => {
       detail: error.response?.data?.message || error.message || 'Failed to create team.',
       life: 3000,
     });
-  }finally{
+  } finally {
+    loading.value = false;
     createTeamDialogVisible.value = false;
   }
 };
 
 // Invite User Handlers
-const openInviteUserDialog = () => {
+const openInviteUserDialog = (teamId = null) => {
+  selectedTeamId.value = teamId || null; // Correctly set to teamId if provided
   inviteUserDialogVisible.value = true;
 };
 
@@ -241,6 +272,33 @@ const handleRejectInvitation = async (token) => {
     });
   }
 };
+
+// Handle decline an invitation
+const handleDeclineInvitation = async (token) => {
+  try {
+    await teamsStore.declineInvitationAdmin(token);
+    toast.add({
+      severity: 'info',
+      summary: 'Invitation Declined',
+      detail: 'The invitation has been declined successfully.',
+      life: 3000,
+    });
+    await teamsStore.fetchInvitations();
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error Declining Invitation',
+      detail: error.response?.data?.message || error.message || 'Failed to decline invitation.',
+      life: 3000,
+    });
+  }
+};
+
+// Create Team Dialog Visibility
+const createTeamDialogVisible = ref(false);
+
+// Invite User Dialog Visibility
+const inviteUserDialogVisible = ref(false);
 
 // On component mount, fetch initial data
 onMounted(async () => {

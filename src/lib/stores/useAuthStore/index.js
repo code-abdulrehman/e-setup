@@ -13,6 +13,7 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     // Getter to fetch the user's role
     role: (state) => state.user?.role || null,
+    userId: (state) => state.user?._id || null,
   },
   actions: {
     initializeStore() {

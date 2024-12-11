@@ -163,5 +163,29 @@ export const useTeamsStore = defineStore('teams', {
         });
       }
     },
+
+
+
+    // New action for Admin to decline invitations
+    async declineInvitationAdmin(token) {
+      try {
+        await axiosInstance.post(`/teams/invite/decline/${token}`);
+        showToast({
+          severity: 'success',
+          summary: 'Invitation Declined',
+          detail: 'The invitation has been declined successfully.',
+          life: 3000,
+        });
+        // Refresh invitations
+        this.fetchInvitations(this.role, this.userId);
+      } catch (error) {
+        showToast({
+          severity: 'error',
+          summary: 'Error Declining Invitation',
+          detail: error.response?.data?.message || error.message,
+          life: 3000,
+        });
+      }
+    },
   },
 });

@@ -1,3 +1,4 @@
+// src/router/index.js
 import AppLayout from '@/layout/AppLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
@@ -16,7 +17,7 @@ const Landing = () => import('@/views/Landing/Landing.vue');
 const Dashboard = () => import('@/views/Dashboard/Dashboard.vue');
 const Profile = () => import('@/views/Profile/Profile.vue');
 const Settings = () => import('@/views/Settings/Settings.vue');
-const Teams = () => import('@/views/Teams/Teams.vue');
+const TeamsManagement = () => import('@/components/Teams/Teams.vue');
 const TeamDetail = () => import('@/views/Teams/Team/Team.vue');
 const TeamInvite = () => import('@/views/Teams/TeamInvite/TeamInvite.vue');
 const Tasks = () => import('@/views/Tasks/Tasks.vue');
@@ -24,6 +25,9 @@ const TaskDetail = () => import('@/views/Tasks/Task/Task.vue');
 const Reports = () => import('@/views/Reports/Reports.vue');
 const Users = () => import('@/views/Users/Users.vue');
 const UserDetail = () => import('@/views/Users/User/User.vue');
+const Invitations = () => import('@/components/Teams/Sub/InvitationsList/InvitationsList.vue'); // Correct Import
+const TeamsList = () => import('@/components/Teams/Sub/TeamsList/TeamsList.vue'); // Correct Import
+
 // ... import other components similarly
 
 const routes = [
@@ -47,7 +51,7 @@ const routes = [
         component: ForgetPassword,
       },
       {
-        path: '/auth/verify-token/:token',
+        path: 'verify-token/:token',
         name: 'VerifyToken',
         component: VerifyToken,
       },
@@ -75,74 +79,83 @@ const routes = [
     component: AppLayout,
     children: [
       {
-        path: '/',
+        path: '',
         name: 'Dashboard',
         component: Dashboard,
       },
       {
-        path: '/landing',
+        path: 'landing',
         name: 'Landing',
         component: Landing,
       },
       {
-        path: '/profile',
+        path: 'profile',
         name: 'Profile',
         component: Profile,
       },
       {
-        path: '/settings',
+        path: 'settings',
         name: 'Settings',
         component: Settings,
       },
+      // Teams Management Route with Nested Routes for Tabs
       {
-        path: '/teams',
+        path: 'teams',
         name: 'Teams',
-        component: Teams,
+        component: TeamsManagement,
+        children: [
+          {
+            path: '',
+            name: 'TeamsList',
+            component: TeamsList,
+          },
+          {
+            path: 'invitations',
+            name: 'Invitations',
+            component: Invitations,
+          },
+          {
+            path: 'invitations/:token',
+            name: 'Invitations-token',
+            component: Invitations,
+            props: true,
+          },
+          {
+            path: 'team/:id',
+            name: 'TeamDetail',
+            component: TeamDetail,
+            props: true,
+          },
+        ],
       },
-      // {
-      //   path: '/teams/:tabs',
-      //   name: 'Teams',
-      //   component: Teams,
-      // },
       {
-        path: '/teams/team/:id',
-        name: 'TeamDetail',
-        component: TeamDetail,
-        props: true,
-      },
-      {
-        path: '/teams/teaminvite/:token',
-        name: 'TeamInvite',
-        component: TeamInvite,
-        props: true,
-      },
-      {
-        path: '/users',
+        path: 'users',
         name: 'Users',
         component: Users,
       },
       {
-        path: '/users/user/:id',
+        path: 'users/user/:id',
         name: 'UserDetail',
         component: UserDetail,
         props: true,
       },
       {
-        path: '/tasks',
+        path: 'tasks',
         name: 'Tasks',
         component: Tasks,
       },
       {
-        path: '/tasks/task/:id',
+        path: 'tasks/task/:id',
         name: 'TaskDetail',
         component: TaskDetail,
         props: true,
       },
       {
-        path: '/reports',
+        path: 'reports',
         name: 'Reports',
         component: Reports,
       },
+      // ... other private routes
     ],
   },
 
@@ -192,7 +205,7 @@ router.beforeEach((to, from, next) => {
     }
   } else {
     // If not authenticated, restrict access to private routes
-    if (!publicRouteNames.includes(to.name)) {
+    if (!publicRouteNames.includes(to.name) && to.name !== 'NotFound') {
       return next({ name: 'SignIn' }); // Redirect to Login
     }
   }

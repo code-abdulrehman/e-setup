@@ -27,7 +27,7 @@
         placeholder="Select Team"
         class="w-full mb-3"
         :loading="loadingTeams"
-        :disabled="alreadySelectedTeam"
+        :disabled="props.selectedTeamId !== null"
         required
       />
       <div class="flex justify-end gap-2">
@@ -59,6 +59,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  loadingTeams: {
+    type: Boolean,
+    default: false,
+  },
+  selectedTeamId: { 
+    type: String,
+    default: null,
+  },
 });
 
 const emit = defineEmits(['update:visible', 'user-invited']);
@@ -67,10 +75,6 @@ const selectedUser = ref(null);
 const selectedTeam = ref(null);
 const loading = ref(false);
 
-// Determine if a team is preselected and disable the team dropdown accordingly
-const alreadySelectedTeam = computed(() => {
-  return selectedTeam.value !== null;
-});
 
 const submitInvite = () => {
   if (!selectedUser.value || !selectedTeam.value) {
@@ -88,10 +92,20 @@ const submitInvite = () => {
 };
 
 const onHide = () => {
-  emit('update:visible', false);
   selectedUser.value = null;
   selectedTeam.value = null;
+  emit('update:visible', false);
 };
+
+watch(
+  () => props.selectedTeamId,
+  (newTeamId) => {
+    if (newTeamId) {
+      selectedTeam.value = newTeamId;
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>
